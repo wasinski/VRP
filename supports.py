@@ -58,10 +58,20 @@ class Importer(object):
 
         return (node_coordinates_list, demand_list)
 
-    def _create_adjacency_matrix(my_node_coordinates_list):
-        ncl = my_node_coordinates_list
-        for node in ncl:
-            pass
+    def _create_adjacency_matrix(my_node_coordinates_list, my_degree):
+        ncl = my_node_coordinates_list[:]
+        matrix = []
+        while ncl:
+            row = [0]*(my_degree - len(ncl))
+            node1 = ncl.pop(0)
+            for node2 in ncl:
+                row.append(Importer._euclidian_distance(node1, node2))
+            matrix.append(row)
+
+        for i, j in range(my_degree):  # mirroring the matrix
+            matrix[j][i] = matrix[i][j]
+
+        return matrix
 
     def _euclidian_distance(my_node1, my_node2):
         x1, y1 = my_node1
