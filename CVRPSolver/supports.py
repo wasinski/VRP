@@ -7,8 +7,10 @@ class Importer(object):
 
         file_lines = Importer._read_file(filename)
         info, break_lines = Importer._read_info(file_lines)
-        node_coordinates_list, demand_list = Importer._return_nodes_and_delivery_lists(file_lines, break_lines)
-        adjacency_matrix_list = Importer._create_adjacency_matrix(node_coordinates_list, int(info["DIMENSION"]))
+        node_coordinates_list, demand_list = \
+            Importer._return_nodes_and_delivery_lists(file_lines, break_lines)
+        adjacency_matrix_list = \
+            Importer._create_adjacency_matrix(node_coordinates_list, int(info["DIMENSION"]))
 
         adjacency_matrix_array = numpy.array(adjacency_matrix_list)
         demand_array = numpy.array(demand_list)
@@ -61,22 +63,22 @@ class Importer(object):
 
         return (node_coordinates_list, demand_list)
 
-    def _create_adjacency_matrix(my_node_coordinates_list, my_degree):
+    def _create_adjacency_matrix(my_node_coordinates_list, my_dimension):
         ncl = my_node_coordinates_list[:]
         matrix = []
         while ncl:
-            row = [0]*(my_degree+1 - len(ncl))
+            row = [0] * (my_dimension + 1 - len(ncl))
             node1 = ncl.pop(0)
             for node2 in ncl:
                 row.append(Importer._euclidian_distance(node1, node2))
             matrix.append(row)
 
-        for i in range(my_degree):  # mirroring the matrix
-            for j in range(my_degree):
+        for i in range(my_dimension):  # mirroring the matrix
+            for j in range(my_dimension):
                 try:
                     matrix[j][i] = matrix[i][j]
                 except IndexError as e:
-                    print((i, j))
+                    print("bad indexing: " + str((i, j)))
                     raise e
 
         return matrix
@@ -85,8 +87,9 @@ class Importer(object):
         x1, y1 = my_node1
         x2, y2 = my_node2
 
-        distance = ((x1-x2)**2 + (y1-y2)**2) ** 0.5
+        distance = ((x1 - x2)**2 + (y1 - y2)**2) ** 0.5
         return distance
+
 
 class Drawer(object):
     pass
