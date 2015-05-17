@@ -68,7 +68,7 @@ class Network(object):
 
 class Fleet(object):
 
-    __init__(self, my_fleet=None):
+    def __init__(self, my_fleet=None):
         if my_fleet:
             self.fleet = my_fleet
         else:
@@ -83,7 +83,7 @@ class Fleet(object):
 
 class Route(object):  # czy to powinny być rzeczywiste referencje czy kopie?
 
-    __init__(self):
+    def __init__(self):
         self.route = []
 
     def set_route(self, route):

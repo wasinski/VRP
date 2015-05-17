@@ -10,24 +10,20 @@ class Importer(object):
         self.file_lines = []
         self.info = {}
         self.node_coordinates_list = []
-        self.demand_list = []
         self.distance_matrix = None
         self.demand_array = None
 
     def import_data(self, filename):
         # do ostrego przepisania jest ta metoda, uwaga by się nie jebnąć!
-        file_lines = self._read_file(filename)
-        info, break_lines = self._read_info(file_lines)
-        node_coordinates_list, demand_list = \
-            self._return_nodes_and_delivery_lists(file_lines, break_lines)
+        self._read_file(filename)
+        self.info, break_lines = self._read_info()
+        self.node_coordinates_list, demand_list = \
+            self._return_nodes_and_delivery_lists(break_lines)
         adjacency_matrix_list = \
-            self._create_adjacency_matrix(node_coordinates_list, int(info["DIMENSION"]))
+            self._create_distance_matrix(self.node_coordinates_list, int(self.info["DIMENSION"]))
 
-        adjacency_matrix_array = numpy.array(adjacency_matrix_list)
-        demand_array = numpy.array(demand_list)
-
-        self.distance_matrix = adjacency_matrix_array
-        self.demand_array = demand_array
+        self.distance_matrix = numpy.array(adjacency_matrix_list)
+        self.demand_array = numpy.array(demand_list)
 
     def _read_file(self, my_filename):
         filelines = []
@@ -35,8 +31,9 @@ class Importer(object):
             filelines = f.read().splitlines()
         self.file_lines = filelines
 
-    def _read_info(self, my_filelines):
+    def _read_info(self):
 
+        my_filelines = self.file_lines
         info = {}
         start = 0
         middle = 0
@@ -55,10 +52,10 @@ class Importer(object):
                 splited = line.split(':')
                 info[splited[0].strip()] = splited[1].strip()
 
-        self.info = info
-        return (start, middle, end)
+        return info, (start, middle, end)
 
-    def _return_nodes_and_delivery_lists(self, my_filelines, my_breaklines):
+    def _return_nodes_and_delivery_lists(self, my_breaklines):
+        my_filelines = self.file_lines
         start, middle, end = my_breaklines
         node_coordinates_list = []
         demand_list = []
@@ -74,8 +71,7 @@ class Importer(object):
                 splited = list(map(int, splited))
                 demand_list.append(splited[1])
 
-        self.node_coordinates_list
-        self.demand_list
+        return node_coordinates_list, demand_list
 
     def _create_distance_matrix(self, my_node_coordinates_list, my_dimension):
         ncl = deque(my_node_coordinates_list[:])
