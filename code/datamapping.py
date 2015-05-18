@@ -14,7 +14,6 @@ class Importer(object):
         self.demand_array = None
 
     def import_data(self, filename):
-        # do ostrego przepisania jest ta metoda, uwaga by się nie jebnąć!
         self._read_file(filename)
         self.info, break_lines = self._read_info()
         self.node_coordinates_list, demand_list = \
@@ -98,7 +97,12 @@ class Importer(object):
 class DataMapper(object):
 
     def __init__(self, my_importer):
-        minimal_fleet_size = retrieve_minimal_fleet_size(my_importer.info["NAME"])
+        try:
+            minimal_fleet_size = retrieve_minimal_fleet_size(my_importer.info["NAME"])
+        except AttributeError as e:
+            print ("couldn't read minimal fleet size from the file name\n \
+                   file might me corrupted, please fix it manually and retry")
+            raise e
         self.info = my_importer.info
         self.network = self._create_network(my_importer.node_coordinates_list, my_importer.demand_array)
         self.fleet = self._create_fleet(my_importer.info["CAPACITY"], minimal_fleet_size)
