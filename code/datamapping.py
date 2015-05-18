@@ -1,6 +1,6 @@
-from code import baseobjects
-from code.supports import euclidian_distance
 import numpy
+from code import baseobjects as bo
+from code.supports import euclidian_distance, retrieve_minimal_fleet_size
 from collections import deque
 
 
@@ -98,4 +98,24 @@ class Importer(object):
 class DataMapper(object):
 
     def __init__(self, my_importer):
-        pass
+        minimal_fleet_size = retrieve_minimal_fleet_size(my_importer.info["NAME"])
+        self.info = my_importer.info
+        self.network = self._create_network(my_importer.node_coordinates_list, my_importer.demand_array)
+        self.fleet = self._create_fleet(my_importer.info["CAPACITY"], minimal_fleet_size)
+        self.distance_matrix = my_importer.distance_matrix
+
+    def _create_network(self, node_coordinates_list, demand_array):
+        network = bo.Network()
+        for id_, (node_coords, demand) in enumerate(zip(node_coordinates_list, demand_array)):
+            node = bo.Node(id_, node_coords, demand)
+            network.append_node(node)
+        return network
+
+    def _create_fleet(self, capacity, number_of_vehicles=0):
+        vehicles_left = int(number_of_vehicles)
+        fleet = bo.Fleet()
+        while (vehicles_left):
+            vehicle = bo.Vehicle(capacity)
+            fleet.append_vehicle(vehicle)
+            vehicles_left -= 1
+        return fleet

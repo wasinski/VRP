@@ -6,7 +6,7 @@ class TestsImporter(unittest.TestCase):
 
     def setUp(self):
         self.test_filelines = [
-            "NAME : E-n6-k4-test",
+            "NAME : test-E-n6-k4",
             "COMMENT : (##This is bullshit##Christophides and Eilon, Min no of trucks: 4, Optimal value: 375)",
             "TYPE : CVRP",
             "DIMENSION : 6",
@@ -61,7 +61,7 @@ class TestsImporter(unittest.TestCase):
         self.assertEqual(breaklines[1], 13)
         self.assertEqual(breaklines[2], 20)
 
-        self.assertEqual(info["NAME"], "E-n6-k4-test")
+        self.assertEqual(info["NAME"], "test-E-n6-k4")
         self.assertEqual(info["DIMENSION"], "6")
 
     def test_return_nodes_and_delivery_lists(self):

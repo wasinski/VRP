@@ -1,4 +1,4 @@
 #!/bin/bash
 
-python3 -m tests.tests_import 1>/dev/null
-python3 -m tests.tests_datamapper 1>/dev/null
+python3 -m tests.tests_import 1>test.log
+python3 -m tests.tests_datamapper 1>>test.log
