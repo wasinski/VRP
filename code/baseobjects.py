@@ -4,6 +4,7 @@ class Node(object):
         self.id = my_id
         self.coordinates = my_node_coordinates
         self.demand = my_demand
+        self.visited = False
 
     def __eq__(self, other):
         if not isinstance(other, Node):
@@ -23,6 +24,9 @@ class Node(object):
 
     def get_coordinates(self):
         return self.coordinates
+
+    def set_visited(self, state):
+        self.visited = state
 
 
 class Vehicle(object):
@@ -76,7 +80,7 @@ class Vehicle(object):
 class Network(object):
 
     def __init__(self, my_network=None):
-        if my_network:
+        if isinstance(my_network, Network):
             self.network = my_network
         else:
             self.network = []
@@ -91,7 +95,7 @@ class Network(object):
 class Fleet(object):
 
     def __init__(self, my_fleet=None):
-        if my_fleet:
+        if isinstance(my_fleet, Fleet):
             self.fleet = my_fleet
         else:
             self.fleet = []
@@ -119,6 +123,9 @@ class Route(object):  # czy to powinny być rzeczywiste referencje czy kopie?
             raise ValueError
 
     def set_node(self, index, node):
+        if not isinstance(node, Node):
+            print("given argument is not a Node!")
+            raise TypeError
         if node not in self.route:
             self.route[index] = node
         else:
@@ -126,6 +133,9 @@ class Route(object):  # czy to powinny być rzeczywiste referencje czy kopie?
             raise ValueError
 
     def insert_node(self, index, node):
+        if not isinstance(node, Node):
+            print("given argument is not a Node!")
+            raise TypeError
         if node not in self.route:
             self.route.insert(index, node)
         else:

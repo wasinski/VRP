@@ -55,10 +55,8 @@ class TestVehicle(unittest.TestCase):
         self.vehicle1 = bo.Vehicle(2000)
 
     def test_init(self):
-        self.assertEqual(self.vehicle0.id, 0)
         self.assertEqual(self.vehicle0.capacity, 1000)
         self.assertEqual(self.vehicle0.route, [])
-        self.assertEqual(self.vehicle1.id, 1)
         self.assertEqual(self.vehicle1.capacity, 2000)
 
     def test_load(self):
@@ -77,10 +75,29 @@ class TestVehicle(unittest.TestCase):
 class TestNetwork(unittest.TestCase):
 
     def setUp(self):
-        pass
+        self.node0 = bo.Node(0, (9, 66), 0)
+        self.node1 = bo.Node(1, (33, 66), 100)
+        self.node2 = bo.Node(2, (99, 77), 200)
 
-    def test_init(self):
-        pass
+    def test_init_and_append(self):
+        network = bo.Network()
+        network.append_node(self.node0)
+        network.append_node(self.node1)
+        self.assertEqual(network.network, [self.node0, self.node1])
+
+
+class TestFleet(unittest.TestCase):
+
+    def setUp(self):
+        self.vehicle0 = bo.Vehicle(1000)
+        self.vehicle1 = bo.Vehicle(2000)
+
+    def test_init_and_append(self):
+        fleet = bo.Fleet()
+        fleet.append_vehicle(self.vehicle0)
+        fleet.append_vehicle(self.vehicle1)
+        self.assertEqual(fleet.fleet, [self.vehicle0, self.vehicle1])
+
 
 if __name__ == "__main__":
     unittest.main()
