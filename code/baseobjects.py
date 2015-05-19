@@ -10,7 +10,7 @@ class Node(object):
             print("you tried to compare different type of object (correct: Node)")
             raise TypeError
         else:
-            if self.coordinates == other.coordinates and self.demand == other.demand:
+            if self.id == other.id:
                 return True
             else:
                 return False
@@ -112,13 +112,30 @@ class Route(object):  # czy to powinny być rzeczywiste referencje czy kopie?
         self.route = route
 
     def append_node(self, node):
-        self.route.append(node)
+        if node not in self.route:
+            self.route.append(node)
+        else:
+            print("node already in the route!")
+            raise ValueError
 
     def set_node(self, index, node):
-        self.route[index] = node
+        if node not in self.route:
+            self.route[index] = node
+        else:
+            print("node already in the route!")
+            raise ValueError
 
     def insert_node(self, index, node):
-        self.route.insert(index, node)
+        if node not in self.route:
+            self.route.insert(index, node)
+        else:
+            print("node already in the route!")
+            raise ValueError
+
+    def switch_nodes_internaly(self, index1, index2):
+        temp = self.route[index1]
+        self.route[index1] = self.route[index2]
+        self.route[index2] = temp
 
     def get_route(self):
         return self.route

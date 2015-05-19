@@ -6,7 +6,7 @@ class TestNode(unittest.TestCase):
 
     def setUp(self):
         self.node0 = bo.Node(0, (33, 66), 100)
-        self.node1 = bo.Node(1, (33, 66), 100)
+        self.node1 = bo.Node(0, (33, 66), 100)
         self.node2 = bo.Node(2, (99, 77), 200)
 
     def test_init(self):
@@ -20,6 +20,32 @@ class TestNode(unittest.TestCase):
         self.assertFalse(self.node0 == self.node2)
         with self.assertRaises(TypeError):
             self.node0 == 1
+
+
+class TestRoute(unittest.TestCase):
+
+    def setUp(self):
+        self.node0 = bo.Node(0, (9, 66), 0)
+        self.node1 = bo.Node(1, (33, 66), 100)
+        self.node2 = bo.Node(2, (99, 77), 200)
+
+    def test_init(self):
+        route1 = bo.Route()
+        route1.append_node(self.node0)
+        with self.assertRaises(ValueError):
+            route1.append_node(self.node0)
+
+        route1.append_node(self.node1)
+        self.assertEqual(route1.get_route(), [self.node0, self.node1])
+
+        route1.insert_node(1, self.node2)
+        self.assertEqual(route1.get_route(), [self.node0, self.node2, self.node1])
+
+        with self.assertRaises(ValueError):
+            route1.insert_node(1, self.node0)
+
+        route1.switch_nodes_internaly(1, 2)
+        self.assertEqual(route1.get_route(), [self.node0, self.node1, self.node2])
 
 
 class TestVehicle(unittest.TestCase):
@@ -46,15 +72,6 @@ class TestVehicle(unittest.TestCase):
             self.vehicle0.add_load(501)
         with self.assertRaises(ValueError):
             self.vehicle0.subtract_load(501)
-
-
-class TestRoute(unittest.TestCase):
-
-    def setUp(self):
-        pass
-
-    def test_init(self):
-        pass
 
 
 class TestNetwork(unittest.TestCase):
