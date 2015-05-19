@@ -1,18 +1,9 @@
 class Node(object):
 
-    def get_id(self):
-        return self.id
-
     def __init__(self, my_id, my_node_coordinates, my_demand):
         self.id = my_id
         self.coordinates = my_node_coordinates
         self.demand = my_demand
-
-    def get_demand(self):
-        return self.demand
-
-    def get_coordinates(self):
-        return self.coordinates
 
     def __eq__(self, other):
         if not isinstance(other, Node):
@@ -23,6 +14,15 @@ class Node(object):
                 return True
             else:
                 return False
+
+    def get_id(self):
+        return self.id
+
+    def get_demand(self):
+        return self.demand
+
+    def get_coordinates(self):
+        return self.coordinates
 
 
 class Vehicle(object):
