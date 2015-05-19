@@ -52,12 +52,18 @@ class Vehicle(object):
         if self.load + cargo <= self.capacity:
             self.load += cargo
         else:
+            print("couldnt add more cargo!")
+            print("vehicle id:" + str(self.id) + " load:" + str(self. load) +
+                  " cargo:" + str(cargo) + " capacity:" + str(self.capacity))
             raise ValueError
 
     def subtract_load(self, cargo):
         if self.load - cargo >= 0:
             self.load -= cargo
         else:
+            print("couldnt subtract cargo!")
+            print("vehicle id:" + str(self.id) + " load:" + str(self. load) +
+                  " cargo:" + str(cargo) + " capacity:" + str(self.capacity))
             raise ValueError
 
     def get_load(self):

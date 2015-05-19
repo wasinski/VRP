@@ -44,6 +44,7 @@ class TestVehicle(unittest.TestCase):
         self.assertEqual(self.vehicle0.get_load(), 500)
         with self.assertRaises(ValueError):
             self.vehicle0.add_load(501)
+        with self.assertRaises(ValueError):
             self.vehicle0.subtract_load(501)
 
 
