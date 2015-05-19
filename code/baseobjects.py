@@ -106,8 +106,15 @@ class Fleet(object):
     def append_vehicle(self, vehicle):
         self.fleet.append(vehicle)
 
+    def get_vehicle(self, id_):
+        for vehicle in self.fleet:
+            if vehicle.id == id_:
+                return id_
+        print("no match found for given id!")
+        raise ValueError
 
-class Route(object):  # czy to powinny być rzeczywiste referencje czy kopie?
+
+class Route(object):
 
     def __init__(self):
         self.route = []

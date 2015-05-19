@@ -1,20 +1,21 @@
 # TODO: add checking if route/node is fisible!
+from code.datamapping import DataMapper
 
 
 class ProblemInstance(object):
 
-    def __init__(self, my_info, my_network, my_fleet, my_distance_matrix):
-        self.name = my_info['NAME']
-        self.description = my_info['COMMENT']
-        self.type = my_info['TYPE']
-        self.network = my_network
-        self.fleet = my_fleet  # TODO: default min number from space info
-        self.distance_matrix = my_distance_matrix
+    def __init__(self, data_mapper):
+        self.name = data_mapper.info['NAME']
+        self.description = data_mapper.info['COMMENT']
+        self.type = data_mapper.info['TYPE']
+        self.network = data_mapper.network
+        self.fleet = data_mapper.fleet
+        self.distance_matrix = data_mapper.distance_matrix
         self.drawer = None
         self.log_mode = 1
 
-    def set_number_of_vehicles(self, my_number):
-        self.number_of_vehicles = my_number
+    def append_vehicle(self, vehicle):
+        self.fleet.append_vehicle(vehicle)
 
     def get_network(self):
         return self.network
@@ -22,14 +23,14 @@ class ProblemInstance(object):
     def get_node_coordinates(self):
         pass
 
-    def get_adjacency_matrix(self):
-        pass
+    def get_distance_matrix(self):
+        return self.distance_matrix
 
-    def get_delivery_array(self):
+    def get_demand_array(self):
         pass
 
     def get_problem_info(self):
-        pass
+        return (self.name, self.type, self.description)
 
-    def get_vehicle(self):
-        pass
+    def get_vehicle(self, id_):
+        return self.fleet.get_vehicle(id_)
