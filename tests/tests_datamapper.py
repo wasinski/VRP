@@ -10,7 +10,9 @@ class TestDataMapper(unittest.TestCase):
 
     def test_init(self):
         data_mapper = dm.DataMapper(self.test_object)
-        print (data_mapper)
+        self.assertEqual(len(data_mapper.fleet.fleet), 4)
+        self.assertEqual(len(data_mapper.network.network), 6)
+
 
 if __name__ == "__main__":
     unittest.main()
