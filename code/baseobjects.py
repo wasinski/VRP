@@ -49,10 +49,16 @@ class Vehicle(object):
         self.load = load
 
     def add_load(self, cargo):
-        self.load += cargo
+        if self.load + cargo <= self.capacity:
+            self.load += cargo
+        else:
+            raise ValueError
 
     def subtract_load(self, cargo):
-        self.load -= cargo
+        if self.load - cargo >= 0:
+            self.load -= cargo
+        else:
+            raise ValueError
 
     def get_load(self):
         return self.load

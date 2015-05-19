@@ -25,10 +25,26 @@ class TestNode(unittest.TestCase):
 class TestVehicle(unittest.TestCase):
 
     def setUp(self):
-        pass
+        self.vehicle0 = bo.Vehicle(1000)
+        self.vehicle1 = bo.Vehicle(2000)
 
     def test_init(self):
-        pass
+        self.assertEqual(self.vehicle0.id, 0)
+        self.assertEqual(self.vehicle0.capacity, 1000)
+        self.assertEqual(self.vehicle0.route, [])
+        self.assertEqual(self.vehicle1.id, 1)
+        self.assertEqual(self.vehicle1.capacity, 2000)
+
+    def test_load(self):
+        self.vehicle0.set_load(500)
+        self.assertEqual(self.vehicle0.get_load(), 500)
+        self.vehicle0.add_load(200)
+        self.assertEqual(self.vehicle0.get_load(), 700)
+        self.vehicle0.subtract_load(200)
+        self.assertEqual(self.vehicle0.get_load(), 500)
+        with self.assertRaises(ValueError):
+            self.vehicle0.add_load(501)
+            self.vehicle0.subtract_load(501)
 
 
 class TestRoute(unittest.TestCase):
