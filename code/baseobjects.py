@@ -15,7 +15,7 @@ class Node(object):
         return self.coordinates
 
     def __eq__(self, other):
-        if other is not Node:
+        if not isinstance(other, Node):
             print("you tried to compare different type of object (correct: Node)")
             raise TypeError
         else:
