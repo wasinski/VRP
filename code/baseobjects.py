@@ -14,6 +14,16 @@ class Node(object):
     def get_coordinates(self):
         return self.coordinates
 
+    def __eq__(self, other):
+        if other is not Node:
+            print("you tried to compare different type of object (correct: Node)")
+            raise TypeError
+        else:
+            if self.coordinates == other.coordinates and self.demand == other.demand:
+                return True
+            else:
+                return False
+
 
 class Vehicle(object):
 
