@@ -1,5 +1,5 @@
 import argparse
-from CVRPSolver import supports, algorithms
+from code import supports, algorithm
 
 
 class Solver(object):

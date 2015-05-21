@@ -1,0 +1,2 @@
+class BranchNBound(object):
+    pass

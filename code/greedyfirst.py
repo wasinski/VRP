@@ -1,0 +1,2 @@
+class GreedyFirst(object):
+    pass
