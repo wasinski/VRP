@@ -70,6 +70,14 @@ class Vehicle(object):
                   " cargo:" + str(cargo) + " capacity:" + str(self.capacity))
             raise ValueError
 
+    def add_node(self, node):
+        try:
+            self.add_load(node.demand)
+            self.set_route_add_node(node)
+            node.visited = True
+        except ValueError as e:
+            raise e
+
     def get_load(self):
         return self.load
 
@@ -85,6 +93,10 @@ class Network(object):
         else:
             self.network = []
 
+    def __iter__(self):
+        for node in self.network:
+            yield node
+
     def set_network(self, my_network):
         self.network = my_network
 
@@ -99,6 +111,10 @@ class Fleet(object):
             self.fleet = my_fleet
         else:
             self.fleet = []
+
+    def __iter__(self):
+        for vehicle in self.fleet:
+            yield vehicle
 
     def set_fleet(self, my_fleet):
         self.fleet = my_fleet

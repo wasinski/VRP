@@ -1,5 +1,13 @@
 class Algorithm(object):
-    pass
+
+    def __init__(self):
+        pass
+
+    def initialize(self):
+        pass
+
+    def iterate(self):
+        pass
 
 
 class Solution(object):
@@ -13,6 +21,10 @@ class Solution(object):
         wtedy: solution służyłoby tylko za kontener na którym pracowałby algorithm z odpowiednim
         algorithmem ;)
     """
+    def __init__(self, problem_instance, iterations=100):
+        self.current_solution = problem_instance
+        self.best_solution = None
+        self.iterations = iterations
 
 
 if __name__ == '__main__':
