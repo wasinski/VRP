@@ -104,6 +104,12 @@ class Network(object):
     def append_node(self, node):
         self.network.append(node)
 
+    def get_node(self, node_id):
+        for node in self.network:
+            if node.id == node_id:
+                return node
+        raise ValueError
+
     def sort_network_by_demand(self, increasing=True):  # TODO: ta funkcja jest KONIECZNIE do sprawdzenia!
         self.network.sort(key=lambda node: node.get_demand(), reverse=increasing)
 

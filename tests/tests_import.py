@@ -11,7 +11,7 @@ class TestsImporter(unittest.TestCase):
             "TYPE : CVRP",
             "DIMENSION : 6",
             "EDGE_WEIGHT_TYPE : EUC_2D",
-            "CAPACITY : 2000",
+            "CAPACITY : 2500",
             "NODE_COORD_SECTION",
             "1 145 215",
             "2 151 264",

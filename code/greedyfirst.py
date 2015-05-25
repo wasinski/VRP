@@ -1,25 +1,21 @@
 class GreedyFirst(object):
     # TODO: checking if the next node has the same demand, and if it is closer, if yes set it!
-    # do network trzeba dodać sort by demand
-    def run(self, solution):
-        network = solution.network.sort_network_by_demand()
-        fleet = solution.fleet
-        every_node_visited = False
-        while not every_node_visited:
-            for node in network:
-                if not node.visited:
-                    for vehicle in fleet:
-                        try:
-                            vehicle.add_node()
-                            break
-                        except ValueError:
-                            continue
-            for node in network:
-                if node.visited:
-                    every_node_visited = True
-                    continue
-                else:
-                    every_node_visited = False
-                    break
-
-        return solution
+    def run(instance):
+        instance.network.sort_network_by_demand()
+        network = instance.network
+        fleet = instance.fleet
+        # assigning nodes so that they fit the capacity restriction
+        for node in network:
+            if not node.visited:
+                for vehicle in fleet:
+                    try:
+                        vehicle.add_node(node)
+                        break
+                    except ValueError:
+                        continue
+        # inserting start and end point of the route - the depot.
+        depot = network.get_node(1)
+        for vehicle in fleet:
+            vehicle.route.insert(0, depot)
+            vehicle.route.append(depot)
+        return instance

@@ -111,12 +111,14 @@ class DataMapper(object):
     def _create_network(self, node_coordinates_list, demand_array):
         network = bo.Network()
         for id_, (node_coords, demand) in enumerate(zip(node_coordinates_list, demand_array)):
-            node = bo.Node(id_, node_coords, demand)
+            node = bo.Node(id_ + 1, node_coords, demand)
             network.append_node(node)
+        network.get_node(1).visited = True
         return network
 
     def _create_fleet(self, capacity, number_of_vehicles=0):
         vehicles_left = int(number_of_vehicles)
+        capacity = int(capacity)
         fleet = bo.Fleet()
         while (vehicles_left):
             vehicle = bo.Vehicle(capacity)
