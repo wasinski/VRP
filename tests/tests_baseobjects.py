@@ -94,6 +94,16 @@ class TestNetwork(unittest.TestCase):
         for master_node, node in zip(master, network):
             self.assertEqual(master_node, node)
 
+    def test_sort_network_by_demand(self):
+        network = bo.Network()
+        network.append_node(self.node0)
+        network.append_node(self.node2)
+        network.append_node(self.node1)
+        network.sort_network_by_demand()
+        master = [self.node2, self.node1, self.node0]
+        for master_node, node in zip(master, network):
+            self.assertEqual(master_node, node)
+
 
 class TestFleet(unittest.TestCase):
 

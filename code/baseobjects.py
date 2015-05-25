@@ -104,8 +104,8 @@ class Network(object):
     def append_node(self, node):
         self.network.append(node)
 
-    def sort_network_by_demand(self):  # TODO: ta funkcja jest KONIECZNIE do sprawdzenia!
-        self.network.sort(cmp=lambda x, y: cmp(x.demand, y.demand, key=self.network.node))
+    def sort_network_by_demand(self, increasing=True):  # TODO: ta funkcja jest KONIECZNIE do sprawdzenia!
+        self.network.sort(key=lambda node: node.get_demand(), reverse=increasing)
 
 
 class Fleet(object):
