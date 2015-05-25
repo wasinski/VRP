@@ -29,6 +29,7 @@ class Node(object):
         self.visited = state
 
 
+  # duże zmiany w tej klasie się szykują, bo trzeba będzie do route przypisać Route!
 class Vehicle(object):
 
     __id = 0
@@ -102,6 +103,9 @@ class Network(object):
 
     def append_node(self, node):
         self.network.append(node)
+
+    def sort_network_by_demand(self):  # TODO: ta funkcja jest KONIECZNIE do sprawdzenia!
+        self.network.sort(cmp=lambda x, y: cmp(x.demand, y.demand, key=self.network.node))
 
 
 class Fleet(object):

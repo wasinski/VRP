@@ -85,6 +85,15 @@ class TestNetwork(unittest.TestCase):
         network.append_node(self.node1)
         self.assertEqual(network.network, [self.node0, self.node1])
 
+    def test_iter(self):
+        network = bo.Network()
+        network.append_node(self.node0)
+        network.append_node(self.node2)
+        network.append_node(self.node1)
+        master = [self.node0, self.node2, self.node1]
+        for master_node, node in zip(master, network):
+            self.assertEqual(master_node, node)
+
 
 class TestFleet(unittest.TestCase):
 
@@ -97,6 +106,14 @@ class TestFleet(unittest.TestCase):
         fleet.append_vehicle(self.vehicle0)
         fleet.append_vehicle(self.vehicle1)
         self.assertEqual(fleet.fleet, [self.vehicle0, self.vehicle1])
+
+    def test_iter(self):
+        fleet = bo.Fleet()
+        fleet.append_vehicle(self.vehicle0)
+        fleet.append_vehicle(self.vehicle1)
+        master = [self.vehicle0, self.vehicle1]
+        for master_vehicle, vehicle in zip(master, fleet):
+            self.assertEqual(master_vehicle, vehicle)
 
 
 if __name__ == "__main__":

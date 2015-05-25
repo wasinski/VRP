@@ -1,6 +1,6 @@
 class GreedyFirst(object):
     # TODO: checking if the next node has the same demand, and if it is closer, if yes set it!
-
+    # do network trzeba dodać sort by demand
     def run(self, solution):
         network = solution.network.sort_network_by_demand()
         fleet = solution.fleet
@@ -22,3 +22,4 @@ class GreedyFirst(object):
                     every_node_visited = False
                     break
 
+        return solution
