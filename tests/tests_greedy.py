@@ -23,9 +23,9 @@ class TestGreedy(unittest.TestCase):
             for node in vehicle.route:
                 count += 1
         self.assertEqual(count, 28)  # 28 because every vehicle stats and ends at the depot
-        self.assertEqual(self.solution.best_solution.fleet.fleet[0].load, 4450)
-        self.assertEqual(self.solution.best_solution.fleet.fleet[1].load, 4475)
-        self.assertEqual(self.solution.best_solution.fleet.fleet[2].load, 1264)
+        self.assertEqual(self.solution.best_solution.fleet[0].load, 4450)
+        self.assertEqual(self.solution.best_solution.fleet[1].load, 4475)
+        self.assertEqual(self.solution.best_solution.fleet[2].load, 1264)
 
 if __name__ == "__main__":
     unittest.main()

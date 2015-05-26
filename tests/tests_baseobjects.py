@@ -56,7 +56,7 @@ class TestVehicle(unittest.TestCase):
 
     def test_init(self):
         self.assertEqual(self.vehicle0.capacity, 1000)
-        self.assertEqual(self.vehicle0.route, [])
+        self.assertEqual(self.vehicle0.route.route, bo.Route().route)
         self.assertEqual(self.vehicle1.capacity, 2000)
 
     def test_load(self):

@@ -16,6 +16,6 @@ class GreedyFirst(object):
         # inserting start and end point of the route - the depot.
         depot = network.get_node(1)
         for vehicle in fleet:
-            vehicle.route.insert(0, depot)
-            vehicle.route.append(depot)
+            vehicle.route.insert_node(0, depot)
+            vehicle.route.append_node(depot)
         return instance

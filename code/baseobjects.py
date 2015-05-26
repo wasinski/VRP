@@ -29,7 +29,6 @@ class Node(object):
         self.visited = state
 
 
-  # duże zmiany w tej klasie się szykują, bo trzeba będzie do route przypisać Route!
 class Vehicle(object):
 
     __id = 0
@@ -38,14 +37,14 @@ class Vehicle(object):
         self.id = Vehicle.__id
         Vehicle.__id += 1
         self.capacity = my_capacity
-        self.route = []
+        self.route = Route()
         self.load = 0
 
     def set_route(self, my_route):
         self.route = my_route
 
     def set_route_add_node(self, my_node):
-        self.route.append(my_node)
+        self.route.append_node(my_node)
 
     def get_capacity(self):
         return self.capacity
@@ -98,6 +97,9 @@ class Network(object):
         for node in self.network:
             yield node
 
+    def __getitem__(self, key):
+        return self.network[key]
+
     def set_network(self, my_network):
         self.network = my_network
 
@@ -126,6 +128,9 @@ class Fleet(object):
         for vehicle in self.fleet:
             yield vehicle
 
+    def __getitem__(self, key):
+        return self.fleet[key]
+
     def set_fleet(self, my_fleet):
         self.fleet = my_fleet
 
@@ -145,11 +150,18 @@ class Route(object):
     def __init__(self):
         self.route = []
 
+    def __iter__(self):
+        for node in self.route:
+            yield node
+
+    def __getitem__(self, key):
+        return self.route[key]
+
     def set_route(self, route):
         self.route = route
 
     def append_node(self, node):
-        if node not in self.route:
+        if node not in self.route or node.id is 1:  # depot can be visited multiple time
             self.route.append(node)
         else:
             print("node already in the route!")
