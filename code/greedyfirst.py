@@ -4,7 +4,7 @@ class GreedyFirst(object):
     def __init__(self, instance):
         self.instance = instance
 
-    def run(self):
+    def run(self, sort=False):
         self.instance.network.sort_network_by_demand()
         network = self.instance.network
         fleet = self.instance.fleet
@@ -21,12 +21,27 @@ class GreedyFirst(object):
         depot = network.get_node(1)
         for vehicle in fleet:
             vehicle.route.insert_node(0, depot)
+            print(sort)
+            if sort:
+                vehicle = self.sort_by_distance(vehicle)
             vehicle.route.append_node(depot)
         return self.instance
 
-    def sort_by_distance(fleet):
-        for vehicle in fleet:
-            pass
-        pass
+    def sort_by_distance(self, vehicle):
+        sorted_route = []
+        sorted_route.append(vehicle.route.pop_node_id(0))
+        while(vehicle.route.route):
+            source_id = sorted_route[-1].id
+            destination_id = self.get_nearest_node(source_id, vehicle.route.route)
+            sorted_route.append(vehicle.route.pop_node_id(destination_id))
+        return vehicle
 
-self.network.sort(key=lambda node: node.get_demand()
+    def get_nearest_node(self, source_id, present_nodes):
+        minimum = 99999999999
+        destination_id = None
+        for destination in present_nodes:
+            distance = self.distance_matrix[source_id-1][destination.id-1]
+            if 0 < distance < minimum:
+                minimum = distance
+                destination_id = destination.id
+        return destination_id
