@@ -1,5 +1,4 @@
 # TODO: add checking if route/node is fisible!
-from code.datamapping import DataMapper
 
 
 class ProblemInstance(object):

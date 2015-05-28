@@ -16,8 +16,8 @@ class TestGreedy(unittest.TestCase):
         self.solution = a.Solution(problem)
 
     def test_greedy(self):
-
-        self.solution.best_solution = gf.GreedyFirst.run(self.solution.current_solution)
+        greedy = gf.GreedyFirst(self.solution.current_solution)
+        self.solution.best_solution = greedy.run()
         count = 0
         for vehicle in self.solution.best_solution.fleet.fleet:
             for node in vehicle.route:
