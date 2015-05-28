@@ -24,19 +24,18 @@ class GreedyFirst(object):
         for vehicle in fleet:
             vehicle.route.insert_node(0, depot)
             if sort:
-                vehicle = self.sort_by_distance(vehicle)
+                vehicle.route = self.sort_by_distance(vehicle.route)
             vehicle.route.append_node(depot)
         return self.instance
 
-    def sort_by_distance(self, vehicle):
+    def sort_by_distance(self, route):
         sorted_route = baseobjects.Route()
-        sorted_route.append_node(vehicle.route.pop_node_id(1))
-        while(vehicle.route.route):
+        sorted_route.append_node(route.pop_node_id(1))
+        while(route.route):
             source_id = sorted_route[-1].id
-            destination_id = self.get_nearest_node(source_id, vehicle.route.route)
-            sorted_route.append_node(vehicle.route.pop_node_id(destination_id))
-        vehicle.set_route(sorted_route)
-        return vehicle
+            destination_id = self.get_nearest_node(source_id, route.route)
+            sorted_route.append_node(route.pop_node_id(destination_id))
+        return sorted_route
 
     def get_nearest_node(self, source_id, present_nodes):
         minimum = 99999999999

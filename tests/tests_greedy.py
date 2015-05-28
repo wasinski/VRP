@@ -52,7 +52,6 @@ class TestGreedy(unittest.TestCase):
         self.assertEqual(self.solution.solution.fleet[0].load, 4450)
         self.assertEqual(self.solution.solution.fleet[1].load, 4475)
         self.assertEqual(self.solution.solution.fleet[2].load, 1264)
-        print("-------------")
 
     def test_greedy_sort_true(self):
         greedy = gf.GreedyFirst(self.solution.solution)
@@ -66,6 +65,7 @@ class TestGreedy(unittest.TestCase):
         self.assertEqual(self.solution.solution.fleet[0].load, 4450)
         self.assertEqual(self.solution.solution.fleet[1].load, 4475)
         self.assertEqual(self.solution.solution.fleet[2].load, 1264)
+
 
 if __name__ == "__main__":
     unittest.main()
