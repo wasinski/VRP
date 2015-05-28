@@ -67,5 +67,36 @@ class TestGreedy(unittest.TestCase):
         self.assertEqual(self.solution.solution.fleet[2].load, 1264)
 
 
+class TestSolution(unittest.TestCase):
+
+    value1 = 0
+    value2 = 0
+
+    def setUp(self):
+        raw_data = dm.Importer()
+        raw_data.import_data("./tests/E-n23-k3.vrp")
+        data = dm.DataMapper(raw_data)
+
+        problem = i.ProblemInstance(data)
+        self.solution = a.Solution(problem)
+
+    def test_calculate_value1(self):
+        greedy = gf.GreedyFirst(self.solution.solution)
+        self.solution.solution = greedy.run(sort=False)
+
+        self.solution.value = self.solution.calculate_value()
+        TestSolution.value1 = self.solution.value
+
+    def test_calculate_value2(self):
+        greedy = gf.GreedyFirst(self.solution.solution)
+        self.solution.solution = greedy.run(sort=True)
+
+        self.solution.value = self.solution.calculate_value()
+        TestSolution.value2 = self.solution.value
+
+        self.assertTrue(TestSolution.value2 <= TestSolution.value1)
+
+        print ("vals:", TestSolution.value1, TestSolution.value2)
+
 if __name__ == "__main__":
     unittest.main()
