@@ -1,7 +1,11 @@
+from code import instance
+
+
 class Algorithm(object):
 
-    def __init__(self):
-        pass
+    def __init__(self, iterations, algo):
+        self.iterations = iterations
+        self.algo = algo
 
     def initialize(self):
         pass
@@ -21,11 +25,19 @@ class Solution(object):
         wtedy: solution służyłoby tylko za kontener na którym pracowałby algorithm z odpowiednim
         algorithmem ;)
     """
-    def __init__(self, problem_instance, iterations=100):
-        self.current_solution = problem_instance
-        self.best_solution = None
-        self.iterations = iterations
+    def __init__(self, problem_instance):
+        self.solution = problem_instance
+        self.feasible = False
+        self.value = None
 
+    def evaluate(self):
+        pass
+
+    def is_feasible(self):
+        pass
+
+    def calculate_value(self):
+        pass
 
 if __name__ == '__main__':
     pass
