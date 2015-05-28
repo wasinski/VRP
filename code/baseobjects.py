@@ -112,7 +112,7 @@ class Network(object):
                 return node
         raise ValueError
 
-    def sort_network_by_demand(self, increasing=True):  # TODO: ta funkcja jest KONIECZNIE do sprawdzenia!
+    def sort_network_by_demand(self, increasing=True):
         self.network.sort(key=lambda node: node.get_demand(), reverse=increasing)
 
 

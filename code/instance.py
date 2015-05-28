@@ -1,6 +1,3 @@
-# TODO: add checking if route/node is fisible!
-
-
 class ProblemInstance(object):
 
     def __init__(self, data_mapper):

@@ -1,6 +1,3 @@
-from code import instance
-
-
 class Algorithm(object):
 
     def __init__(self, iterations, algo):

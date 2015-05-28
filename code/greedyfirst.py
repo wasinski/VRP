@@ -2,7 +2,6 @@ from code import baseobjects
 
 
 class GreedyFirst(object):
-    # TODO: checking if the next node has the same demand, and if it is closer, if yes set it!
 
     def __init__(self, instance):
         self.instance = instance
@@ -20,7 +19,7 @@ class GreedyFirst(object):
                         break
                     except ValueError:
                         continue
-        # inserting start and end point of the route - the depot.
+        # sorting (if sort=True), and inserting start and end point of the route - the depot.
         depot = network.get_node(1)
         for vehicle in fleet:
             vehicle.route.insert_node(0, depot)
@@ -43,7 +42,7 @@ class GreedyFirst(object):
         minimum = 99999999999
         destination_id = None
         for destination in present_nodes:
-            distance = self.instance.distance_matrix[source_id-1][destination.id-1]
+            distance = self.instance.distance_matrix[source_id - 1][destination.id - 1]
             if 0 < distance < minimum:
                 minimum = distance
                 destination_id = destination.id
