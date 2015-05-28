@@ -31,9 +31,9 @@ class GreedyFirst(object):
     def sort_by_distance(self, route):
         sorted_route = baseobjects.Route()
         sorted_route.append_node(route.pop_node_id(1))
-        while(route.route):
+        while(route):
             source_id = sorted_route[-1].id
-            destination_id = self.get_nearest_node(source_id, route.route)
+            destination_id = self.get_nearest_node(source_id, route)
             sorted_route.append_node(route.pop_node_id(destination_id))
         return sorted_route
 

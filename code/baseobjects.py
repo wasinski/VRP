@@ -157,6 +157,9 @@ class Route(object):
     def __getitem__(self, key):
         return self.route[key]
 
+    def __bool__(self):
+        return bool(self.route)
+
     def set_route(self, route):
         self.route = route
 
