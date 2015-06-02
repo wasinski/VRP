@@ -4,5 +4,6 @@ python3 -m tests.tests_import 1>test.log
 python3 -m tests.tests_datamapper 1>>test.log
 python3 -m tests.tests_baseobjects 1>>test.log
 python3 -m tests.tests_greedy 1>>test.log
+python3 -m tests.tests_branchnbound.py 1>>test.log
 
 #cat test.log
