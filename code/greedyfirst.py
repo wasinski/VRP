@@ -2,6 +2,13 @@ from code import baseobjects
 
 
 class GreedyFirst(object):
+    """ A very simple greedy algorithm, used for initializing more complex algo's.
+
+        Nodes are sorted by their demand, and then selected i that order to be attended by first
+            vehicle that has availible capacity. After that every route is sorted (if sort=True)
+            by distance - first nearest node from the previous node in the route.
+            So starting from the depot it goes to nearest, and then nearest from that one, and so on.
+    """
 
     def __init__(self, instance):
         self.instance = instance
