@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 
 
 class BranchNBound(object):
@@ -28,22 +29,22 @@ class BranchNBound(object):
 class BnBPartialSolution(object):
 
     def __init__(self, partial_solution):
-        self.network = partial_solution.network
-        self.fleet = partial_solution.fleet
-        self.distance_matrix = partial_solution.distance_matrix
+        self.network = copy.deepcopy(partial_solution.network, memo={})
+        self.fleet = copy.deepcopy(partial_solution.fleet, memo={})
+        self.distance_matrix = copy.deepcopy(partial_solution.distance_matrix)
         self.lower_bound = partial_solution.lower_bound
-        self.edges = partial_solution.edges
+        self.edges = copy.deepcopy(partial_solution.edges, memo={})
 
     @classmethod
     def init_from_instance(cls, instance):
-        network = instance.network
-        fleet = instance.fleet
-        distance_matrix = BnBPartialSolution.convert(instance.distance_matrix)
-        lower_bound = None
-        edges = {True: [], False: []}
-        return cls(network, fleet, distance_matrix, lower_bound, edges)
+        cls.network = instance.network
+        cls.fleet = instance.fleet
+        cls.distance_matrix = BnBPartialSolution.convert(instance.distance_matrix, len(instance.fleet))
+        cls.lower_bound = None
+        cls.edges = {True: [], False: []}
+        return cls(cls)
 
-    def bound(self):
+    def compute_bound(self):
         pass
 
     def branch(self):
@@ -57,6 +58,7 @@ class BnBPartialSolution(object):
 
     def convert(matrix, fleet_size):
         converted = []
+
         # initialize matrix
         for i in range(len(matrix) + fleet_size):
             row = [float("inf")] * (len(matrix) + fleet_size)
@@ -64,7 +66,6 @@ class BnBPartialSolution(object):
 
         # please remember that first $fleet_size rows are index = 1, and contain 'to depot' distance
         # make first row an index row
-
         for i in range(1, len(converted[0])):
             if i <= fleet_size:
                 converted[0][i] = 1
