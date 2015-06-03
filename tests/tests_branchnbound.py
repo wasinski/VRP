@@ -1,5 +1,7 @@
 import unittest
 from code import branchnbound as bnb
+from code import instance as i
+from code import datamapping as dm
 
 
 class TestBnB(unittest.TestCase):
@@ -9,7 +11,11 @@ class TestBnB(unittest.TestCase):
 class TestBnBPartialSolution(unittest.TestCase):
 
     def setUp(self):
-        pass
+        raw_data = dm.Importer()
+        raw_data.import_data("./tests/cvrp1.test")
+        data = dm.DataMapper(raw_data)
+
+        self.instance = i.ProblemInstance(data)
 
     def test_convert(self):
         entry_matrix = [
@@ -48,6 +54,38 @@ class TestBnBPartialSolution(unittest.TestCase):
         for master_row, converted_row in zip(master2, converted_matrix2):
             for master_val, converted_val in zip(master_row, converted_row):
                 self.assertEqual(master_val, converted_val)
+
+    def test_constructors1(self):
+        bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
+        bnbinstance2 = bnb.BnBPartialSolution(bnbinstance)
+        self.assertEqual(bnbinstance.edges, {True: [], False: []})
+        self.assertEqual(bnbinstance2.edges, {True: [], False: []})
+
+    def tests_constructors2(self):
+        bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
+        bnbinstance.lower_bound = 30
+        bnbinstance2 = bnb.BnBPartialSolution(bnbinstance)
+        self.assertEqual(bnbinstance2.lower_bound, 30)
+
+        bnbinstance2.lower_bound = 35
+        self.assertEqual(bnbinstance2.lower_bound, 35)
+
+        bnbinstance3 = bnb.BnBPartialSolution(bnbinstance2)
+        self.assertEqual(bnbinstance3.lower_bound, 35)
+
+        bnbinstance3.lower_bound = 15
+        self.assertEqual(bnbinstance3.lower_bound, 15)
+
+        bnbinstance2.lower_bound = 35
+        self.assertEqual(bnbinstance2.lower_bound, 35)
+
+        bnbinstance2.edges[True].append('1-2')
+        self.assertEqual(bnbinstance.edges, {True: [], False: []})
+        self.assertEqual(bnbinstance2.edges, {True: ['1-2'], False: []})
+
+        self.assertEqual(len(bnbinstance.distance_matrix[0]), 10)
+        self.assertEqual(len(bnbinstance.distance_matrix), 10)
+
 
 if __name__ == "__main__":
     unittest.main()
