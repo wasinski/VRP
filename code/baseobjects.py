@@ -131,6 +131,9 @@ class Fleet(object):
     def __getitem__(self, key):
         return self.fleet[key]
 
+    def __len__(self):
+        return len(self.fleet)
+
     def set_fleet(self, my_fleet):
         self.fleet = my_fleet
 
