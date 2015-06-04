@@ -1,3 +1,4 @@
+import collections
 import numpy as np
 import copy
 
@@ -20,9 +21,17 @@ class BranchNBound(object):
         pass
 
     def run(self):
+        # this is just a sketch
+        while self.partial_solutions:
+            promising_solution = self.pop_most_promising_solution()
+            self.partial_solutions.extend(promising_solution.branch())
+            self.evaluate_solution_space()
+            self.prune_solution_space()
+
+    def branch(self, edge):
         pass
 
-    def pop_most_promising(self):
+    def pop_most_promising_solution(self):
         most_promising = self.partial_solutions[0]
         index = 0
         for i, solution in enumerate(self.partial_solutions):
@@ -46,18 +55,22 @@ class BnBPartialSolution(object):
 
     def __init__(self, partial_solution):
         self.network = copy.deepcopy(partial_solution.network, memo={})
-        self.fleet = copy.deepcopy(partial_solution.fleet, memo={})
+        self.routes = copy.deepcopy(partial_solution.routes, memo={})
         self.distance_matrix = partial_solution.distance_matrix.copy()
         self.lower_bound = partial_solution.lower_bound
         self.edges = copy.deepcopy(partial_solution.edges, memo={})
+        self.is_feasible = partial_solution.is_feasible
+        self.unsolvable = partial_solution.unsolvable
 
     @classmethod
     def init_from_instance(cls, instance):
         cls.network = instance.network
-        cls.fleet = instance.fleet
+        cls.routes = None
         cls.distance_matrix = BnBPartialSolution.convert(instance.distance_matrix, len(instance.fleet))
         cls.lower_bound = None
         cls.edges = {True: [], False: []}
+        cls.is_feasible = False
+        cls.unsolvable = False
         return cls(cls)
 
     def bound(self):
@@ -70,13 +83,87 @@ class BnBPartialSolution(object):
         lower_bound = sum(row_minimums) + sum(column_minimums)
         return lower_bound
 
-    def branch(self, edge):
-        pass
+    def with_edge_branch(self, edge):
+        self.edges[True].append(edge)
+        matrix = self.distance_matrix
+        i, j = self.edge_to_real_indexes(edge)
+        matrix = np.delete(matrix, (i), axis=0)
+        matrix = np.delete(matrix, (j), axis=1)
+
+    def without_edge_branch(self, edge):
+        self.edges[False].append(edge)
+        matrix = self.distance_matrix
+        i, j = self.edge_to_real_indexes(edge)
+        matrix[i, j] = float("inf")
+        self.evaluate_solution()
+
+    def edge_to_real_indexes(self, edge):
+        row, column = edge
+        real_row = None
+        real_column = None
+        for i, row_index in enumerate(self.distance_matrix[:, 0]):
+            if row == row_index:
+                real_row = i
+                break
+        for j, col_index in enumerate(self.distance_matrix[0, :]):
+            if column == col_index:
+                real_column = j
+                break
+        if real_row is None or real_column is None:
+            raise ValueError
+        return (real_row, real_column)
 
     def construct_route(self):
-        pass
+        DEPOT = 1
+        routes = []
+        edges = collections.deque(self.edges[True])
+        memo = {}
+        routes.append([edges.pop()])
+        while edges:
+            edge = edges.pop()
+            inserted = False
+            for route in routes:
+                for i, route_edge in enumerate(route):
+                    if edge[1] == route_edge[0]:
+                        if i == 0 or route[i - 1][1] == edge[0]:
+                            route.insert(i, edge)
+                            inserted = True
+                            break
+                    elif route_edge[1] == edge[0]:
+                        if (i == len(route) - 1) or edge[1] == route[i + 1][0]:
+                            route.insert(i + 1, edge)
+                            inserted = True
+                            break
+            if not inserted:
+                try:
+                    memo[edge] += 1
+                    if memo[edge] > 3:
+                        routes.append([edge])
+                    else:
+                        edges.appendleft(edge)
+                except KeyError:
+                    memo[edge] = 1
+                    edges.appendleft(edge)
 
-    def update_solution(self):
+        # until begins/ends (and that's possible) in depot rotate route
+        for route in routes:
+            normalizable = False
+            for edge in route:
+                if edge[0] is DEPOT or edge[1] is DEPOT:
+                    normalizable = True
+            if normalizable:
+                normalized = False
+                while not normalized:
+                    if route[0][0] is DEPOT or route[-1][1] is DEPOT:
+                        normalized = True
+                    else:
+                        route.insert(0, route.pop())
+                        print("rotated")
+            else:
+                continue
+        self.routes = routes
+
+    def evaluate_solution(self):
         pass
 
     def select_edge(self):
@@ -85,6 +172,8 @@ class BnBPartialSolution(object):
         highest_penalty = 0
         for i in range(1, len(matrix)):
             for j in range(1, len(matrix)):
+                if matrix[i, j] is 0:
+                    continue
                 row = matrix[i, 1:].copy()
                 row[j-1] = float("inf")
                 column = matrix[1:, j].copy()
