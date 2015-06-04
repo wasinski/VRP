@@ -5,7 +5,23 @@ from code import datamapping as dm
 
 
 class TestBnB(unittest.TestCase):
-    pass
+
+    def setUp(self):
+        raw_data = dm.Importer()
+        raw_data.import_data("./tests/cvrp1.test")
+        data = dm.DataMapper(raw_data)
+
+        self.instance = i.ProblemInstance(data)
+
+    def test_initialize(self):
+        pass
+
+    def test_run(self):
+        pass
+
+    def test_pop_most_promising(self):
+        pass
+
 
 
 class TestBnBPartialSolution(unittest.TestCase):
@@ -99,6 +115,21 @@ class TestBnBPartialSolution(unittest.TestCase):
         bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
         LB = bnbinstance.bound()
         self.assertEqual(LB, 11.0)
+
+    def tests_select_edge(self):
+        self.instance.fleet.fleet.pop()
+        self.instance.fleet.fleet.pop()
+        self.instance.distance_matrix = [
+            [0, 7, 1, 3, 2],
+            [8, 0, 5, 3, 7],
+            [1, 2, 0, 9, 4],
+            [3, 1, 9, 0, 5],
+            [4, 6, 7, 3, 0]
+        ]
+        bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
+        LB = bnbinstance.bound()
+        selected_edge = bnbinstance.select_edge()
+        self.assertEqual((4, 2), selected_edge)
 
 
 if __name__ == "__main__":

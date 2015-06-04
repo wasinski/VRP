@@ -16,14 +16,30 @@ class BranchNBound(object):
         self.times_branched = 0
         self.initial_upper_bound = None
 
+    def initialize(self, someArguments):
+        pass
+
     def run(self):
         pass
 
-    def select_most_promising(self):
-        pass
+    def pop_most_promising(self):
+        most_promising = self.partial_solutions[0]
+        index = 0
+        for i, solution in enumerate(self.partial_solutions):
+            if self.is_more_promising(most_promising, solution):
+                most_promising = solution
+                index = i
+        return self.partial_solutions.pop(index)
 
     def prune(self):
         pass
+
+    def is_more_promising(self, best, current):
+        if current.lower_bound <= best.lower_bound:
+            if len(current.edges[True]) > len(best.edges[True]):
+                return True
+        else:
+            return False
 
 
 class BnBPartialSolution(object):
@@ -54,7 +70,7 @@ class BnBPartialSolution(object):
         lower_bound = sum(row_minimums) + sum(column_minimums)
         return lower_bound
 
-    def branch(self):
+    def branch(self, edge):
         pass
 
     def construct_route(self):
@@ -62,6 +78,25 @@ class BnBPartialSolution(object):
 
     def update_solution(self):
         pass
+
+    def select_edge(self):
+        matrix = self.distance_matrix
+        best_edge = (None, None)
+        highest_penalty = 0
+        for i in range(1, len(matrix)):
+            for j in range(1, len(matrix)):
+                row = matrix[i, 1:].copy()
+                row[j-1] = float("inf")
+                column = matrix[1:, j].copy()
+                column[i-1] = float("inf")
+                penalty = min(row) + min(column)
+                if penalty > highest_penalty:
+                    row_index = matrix[i, 0]
+                    col_index = matrix[0, j]
+                    highest_penalty = penalty
+                    best_edge = (row_index, col_index)
+
+        return best_edge
 
     def convert(matrix, fleet_size):
         converted = []
