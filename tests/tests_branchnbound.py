@@ -86,6 +86,20 @@ class TestBnBPartialSolution(unittest.TestCase):
         self.assertEqual(len(bnbinstance.distance_matrix[0]), 10)
         self.assertEqual(len(bnbinstance.distance_matrix), 10)
 
+    def tests_bound(self):
+        self.instance.fleet.fleet.pop()
+        self.instance.fleet.fleet.pop()
+        self.instance.distance_matrix = [
+            [0, 7, 1, 3, 2],
+            [8, 0, 5, 3, 7],
+            [1, 2, 0, 9, 4],
+            [3, 1, 9, 0, 5],
+            [4, 6, 7, 3, 0]
+        ]
+        bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
+        LB = bnbinstance.bound()
+        self.assertEqual(LB, 11.0)
+
 
 if __name__ == "__main__":
     unittest.main()

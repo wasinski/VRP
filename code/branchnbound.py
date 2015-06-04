@@ -31,7 +31,7 @@ class BnBPartialSolution(object):
     def __init__(self, partial_solution):
         self.network = copy.deepcopy(partial_solution.network, memo={})
         self.fleet = copy.deepcopy(partial_solution.fleet, memo={})
-        self.distance_matrix = copy.deepcopy(partial_solution.distance_matrix)
+        self.distance_matrix = partial_solution.distance_matrix.copy()
         self.lower_bound = partial_solution.lower_bound
         self.edges = copy.deepcopy(partial_solution.edges, memo={})
 
@@ -44,8 +44,15 @@ class BnBPartialSolution(object):
         cls.edges = {True: [], False: []}
         return cls(cls)
 
-    def compute_bound(self):
-        pass
+    def bound(self):
+        matrix = self.distance_matrix
+        row_minimums = matrix[1:, 1:].min(axis=1)
+        row_minimums = row_minimums[:, np.newaxis]
+        matrix[1:, 1:] -= row_minimums
+        column_minimums = matrix[1:, 1:].min(axis=0)
+        matrix[1:, 1:] -= column_minimums
+        lower_bound = sum(row_minimums) + sum(column_minimums)
+        return lower_bound
 
     def branch(self):
         pass
@@ -58,7 +65,7 @@ class BnBPartialSolution(object):
 
     def convert(matrix, fleet_size):
         converted = []
-
+        # TODO: I actually wonder if it wasn't been better to work on the np.array from the beginning...
         # initialize matrix
         for i in range(len(matrix) + fleet_size):
             row = [float("inf")] * (len(matrix) + fleet_size)
