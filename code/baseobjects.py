@@ -1,3 +1,4 @@
+# TODO: deepcopy atributes need to be fixed, as in Network (that one works fine)
 import copy
 
 
@@ -104,7 +105,8 @@ class Network(object):
         return self.network[key]
 
     def __deepcopy__(self, memo):
-        return copy.deepcopy(self.network, memo={})
+        network_copy = copy.deepcopy(self.network)
+        return Network(network_copy)
 
     def set_network(self, my_network):
         self.network = my_network
