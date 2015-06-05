@@ -1,4 +1,5 @@
 import unittest
+import numpy
 from code import branchnbound as bnb
 from code import instance as i
 from code import datamapping as dm
@@ -210,6 +211,30 @@ class TestBnBPartialSolution(unittest.TestCase):
         bnbinstance.routes = [[(1, 3), (3, 1)], [(1, 2), (2, 5), (5, 2)]]
         bnbinstance.set_is_solvable()
         self.assertEqual(True, bnbinstance.solvable)
+
+    def tests_is_and_solve_leaf(self):
+
+        bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
+        self.assertFalse(bnbinstance.is_leaf())
+
+        bnbinstance.distance_matrix = numpy.array([[1, 0], [1, 2]])
+        with self.assertRaises(ValueError):
+            bnbinstance.is_leaf()
+
+        bnbinstance.distance_matrix = numpy.array([[float("inf"), 0, 1],
+                                                  [1, 2, float("inf")],
+                                                  [2, float("inf"), 0]])
+        self.assertTrue(bnbinstance.is_leaf())
+        bnbinstance.solve_leaf()
+        self.assertEqual(bnbinstance.edges[True], [(1, 0), (2, 1)])
+
+        bnbinstance.distance_matrix = numpy.array([[float("inf"), 0, 3],
+                                                  [1, float("inf"), 2],
+                                                  [2, 0, float("inf")]])
+        bnbinstance.edges = {True: [], False: []}
+        self.assertTrue(bnbinstance.is_leaf())
+        bnbinstance.solve_leaf()
+        self.assertEqual(bnbinstance.edges[True], [(1, 3), (2, 0)])
 
 
 if __name__ == "__main__":

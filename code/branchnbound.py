@@ -112,10 +112,39 @@ class BnBPartialSolution(object):
         self.evaluate_solution()
 
     def is_leaf(self):
-        pass
+        if len(self.distance_matrix) is 3:
+            return True
+        elif len(self.distance_matrix) < 3:
+            raise ValueError
+        else:
+            return False
 
     def solve_leaf(self):
-        pass
+        matrix = self.distance_matrix
+        row_index = matrix[1, 0]
+        col_index = None
+        if not matrix[1, 1] == float("inf"):
+            col_index = matrix[0, 1]
+        elif not matrix[1, 2] == float("inf"):
+            col_index = matrix[0, 2]
+        else:
+            raise ValueError
+        edge1 = (row_index, col_index)
+        print (edge1)
+
+        row_index = matrix[2, 0]
+        col_index = None
+        if not matrix[2, 1] == float("inf"):
+            col_index = matrix[0, 1]
+        elif not matrix[2, 2] == float("inf"):
+            col_index = matrix[0, 2]
+        else:
+            raise ValueError
+        edge2 = (row_index, col_index)
+        print (edge2)
+        print ([edge1, edge2])
+        print (matrix)
+        self.edges[True].extend([edge1, edge2])
 
     def evaluate_solution(self):
         pass
