@@ -158,7 +158,7 @@ class BnBPartialSolution(object):
                     edges.appendleft(edge)
 
         # until begins/ends (and that's possible) in depot rotate route
-        for route in routes:
+        """for route in routes:
             normalizable = False
             for edge in route:
                 if edge[0] is DEPOT or edge[1] is DEPOT:
@@ -171,7 +171,7 @@ class BnBPartialSolution(object):
                     else:
                         route.insert(0, route.pop())
             else:
-                continue
+                continue"""
         self.routes = routes
 
     def select_edge(self):
