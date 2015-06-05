@@ -236,6 +236,14 @@ class TestBnBPartialSolution(unittest.TestCase):
         bnbinstance.solve_leaf()
         self.assertEqual(bnbinstance.edges[True], [(1, 3), (2, 0)])
 
+        bnbinstance.distance_matrix = numpy.array([[float("inf"), 0, 3],
+                                                  [1, float("inf"), float("inf")],
+                                                  [2, 0, float("inf")]])
+        bnbinstance.edges = {True: [], False: []}
+        self.assertTrue(bnbinstance.is_leaf())
+        with self.assertRaises(ValueError):
+            bnbinstance.solve_leaf()
+
 
 if __name__ == "__main__":
     unittest.main()
