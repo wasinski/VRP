@@ -97,6 +97,18 @@ class BnBPartialSolution(object):
         matrix[i, j] = float("inf")
         self.evaluate_solution()
 
+    def is_leaf(self):
+        pass
+
+    def solve_leaf(self):
+        pass
+
+    def evaluate_solution(self):
+        pass
+
+    def check_feasibility(self):
+        pass
+
     def edge_to_real_indexes(self, edge):
         row, column = edge
         real_row = None
@@ -113,7 +125,7 @@ class BnBPartialSolution(object):
             raise ValueError
         return (real_row, real_column)
 
-    def construct_route(self):
+    def construct_routes(self):
         DEPOT = 1
         routes = []
         edges = collections.deque(self.edges[True])
@@ -124,12 +136,12 @@ class BnBPartialSolution(object):
             inserted = False
             for route in routes:
                 for i, route_edge in enumerate(route):
-                    if edge[1] == route_edge[0]:
+                    if edge[1] == route_edge[0] and edge[1] is not DEPOT:
                         if i == 0 or route[i - 1][1] == edge[0]:
                             route.insert(i, edge)
                             inserted = True
                             break
-                    elif route_edge[1] == edge[0]:
+                    elif route_edge[1] == edge[0] and edge[0] is not DEPOT:
                         if (i == len(route) - 1) or edge[1] == route[i + 1][0]:
                             route.insert(i + 1, edge)
                             inserted = True
@@ -158,13 +170,9 @@ class BnBPartialSolution(object):
                         normalized = True
                     else:
                         route.insert(0, route.pop())
-                        print("rotated")
             else:
                 continue
         self.routes = routes
-
-    def evaluate_solution(self):
-        pass
 
     def select_edge(self):
         matrix = self.distance_matrix

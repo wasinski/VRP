@@ -23,7 +23,6 @@ class TestBnB(unittest.TestCase):
         pass
 
 
-
 class TestBnBPartialSolution(unittest.TestCase):
 
     def setUp(self):
@@ -130,6 +129,29 @@ class TestBnBPartialSolution(unittest.TestCase):
         LB = bnbinstance.bound()
         selected_edge = bnbinstance.select_edge()
         self.assertEqual((4, 2), selected_edge)
+
+    def tests_construct_route(self):
+        bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
+        bnbinstance.edges = {True: [(1, 2), (3, 5), (2, 1), (5, 4)], False: []}
+        bnbinstance.construct_routes()
+        self.assertEqual(bnbinstance.routes, [[(3, 5), (5, 4)], [(1, 2), (2, 1)]])
+        bnbinstance.edges = {True: [(3, 5), (1, 2), (2, 1), (5, 4)], False: []}
+        bnbinstance.construct_routes()
+        self.assertEqual(bnbinstance.routes, [[(3, 5), (5, 4)], [(1, 2), (2, 1)]])
+        bnbinstance.edges = {True: [(2, 1), (3, 5), (1, 2), (5, 4)], False: []}
+        bnbinstance.construct_routes()
+        self.assertEqual(bnbinstance.routes, [[(3, 5), (5, 4)], [(1, 2), (2, 1)]])
+
+        bnbinstance.edges = {True: [(1, 2), (2, 3), (3, 5)], False: []}
+        bnbinstance.construct_routes()
+        self.assertEqual(bnbinstance.routes, [[(1, 2), (2, 3), (3, 5)]])
+        bnbinstance.edges = {True: [(2, 3), (3, 5), (1, 2)], False: []}
+        bnbinstance.construct_routes()
+        self.assertEqual(bnbinstance.routes, [[(1, 2), (2, 3), (3, 5)]])
+
+        bnbinstance.edges = {True: [(1, 3), (2, 5), (1, 4), (5, 2), (6, 1)], False: []}
+        bnbinstance.construct_routes()
+        self.assertEqual(bnbinstance.routes, [[(6, 1)], [(2, 5), (5, 2)], [(1, 4)], [(1, 3)]])
 
 
 if __name__ == "__main__":
