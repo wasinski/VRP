@@ -109,6 +109,20 @@ class BnBPartialSolution(object):
     def check_feasibility(self):
         pass
 
+    def routes_edges_to_nodes(self):
+        DEPOT = 1
+        converted_routes = []
+        for route in self.routes:
+            converted_route = []
+            for edge in route:
+                entry, exit = edge
+                if entry not in converted_route:
+                    converted_route.append(entry)
+                if exit not in converted_route or exit is DEPOT:
+                    converted_route.append(exit)
+            converted_routes.append(converted_route)
+        return converted_routes
+
     def edge_to_real_indexes(self, edge):
         row, column = edge
         real_row = None
@@ -149,7 +163,7 @@ class BnBPartialSolution(object):
             if not inserted:
                 try:
                     memo[edge] += 1
-                    if memo[edge] > 3:
+                    if memo[edge] > 2:
                         routes.append([edge])
                     else:
                         edges.appendleft(edge)
