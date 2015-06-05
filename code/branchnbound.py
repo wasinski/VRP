@@ -53,14 +53,15 @@ class BranchNBound(object):
 
 class BnBPartialSolution(object):
 
-    def __init__(self, partial_solution):
-        self.network = copy.deepcopy(partial_solution.network, memo={})
-        self.routes = copy.deepcopy(partial_solution.routes, memo={})
-        self.distance_matrix = partial_solution.distance_matrix.copy()
-        self.lower_bound = partial_solution.lower_bound
-        self.edges = copy.deepcopy(partial_solution.edges, memo={})
-        self.is_feasible = partial_solution.is_feasible
-        self.unsolvable = partial_solution.unsolvable
+    def __init__(self, instance):
+        self.network = instance.network
+        self.routes = instance.routes
+        self.distance_matrix = instance.distance_matrix
+        self.lower_bound = instance.lower_bound
+        self.edges = instance.edges
+        self.is_feasible = instance.is_feasible
+        self.solvable = instance.solvable
+        self.capacity = instance.capacity
 
     @classmethod
     def init_from_instance(cls, instance):
@@ -70,7 +71,20 @@ class BnBPartialSolution(object):
         cls.lower_bound = None
         cls.edges = {True: [], False: []}
         cls.is_feasible = False
-        cls.unsolvable = False
+        cls.solvable = True
+        cls.capacity = instance.fleet.fleet[0].capacity
+        return cls(cls)
+
+    @classmethod
+    def init_from_partial(cls, partial):
+        cls.network = copy.deepcopy(partial.network)
+        cls.routes = None
+        cls.distance_matrix = partial.distance_matrix.copy()
+        cls.lower_bound = partial.lower_bound
+        cls.edges = copy.deepcopy(partial.edges)
+        cls.is_feasible = partial.edges
+        cls.solvable = partial.solvable
+        cls.capacity = partial.capacity
         return cls(cls)
 
     def bound(self):
@@ -106,8 +120,14 @@ class BnBPartialSolution(object):
     def evaluate_solution(self):
         pass
 
-    def check_feasibility(self):
-        pass
+    def set_is_solvable(self):  # i.e. it doesn't already break the constraints (capacity)
+        routes_nodes = self.routes_edges_to_nodes()
+        for route in routes_nodes:
+            load = 0
+            for node_id in route:
+                load += self.network.get_node(node_id).demand
+                if load > self.capacity:
+                    self.solvable = False
 
     def routes_edges_to_nodes(self):
         DEPOT = 1
@@ -160,32 +180,18 @@ class BnBPartialSolution(object):
                             route.insert(i + 1, edge)
                             inserted = True
                             break
-            if not inserted:
+            if not inserted:  # put it on the beginning of the queue for #times or...@down
                 try:
                     memo[edge] += 1
-                    if memo[edge] > 2:
-                        routes.append([edge])
+                    if memo[edge] > 3:
+                        routes.append([edge])  # or create a sperate, new route
                     else:
                         edges.appendleft(edge)
                 except KeyError:
                     memo[edge] = 1
                     edges.appendleft(edge)
-
-        # until begins/ends (and that's possible) in depot rotate route
-        """for route in routes:
-            normalizable = False
-            for edge in route:
-                if edge[0] is DEPOT or edge[1] is DEPOT:
-                    normalizable = True
-            if normalizable:
-                normalized = False
-                while not normalized:
-                    if route[0][0] is DEPOT or route[-1][1] is DEPOT:
-                        normalized = True
-                    else:
-                        route.insert(0, route.pop())
-            else:
-                continue"""
+            # TODO: it might be better to check if there are already matching edges in the queue than
+            # to use a $memo.
         self.routes = routes
 
     def select_edge(self):

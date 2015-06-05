@@ -72,20 +72,20 @@ class TestBnBPartialSolution(unittest.TestCase):
 
     def test_constructors1(self):
         bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
-        bnbinstance2 = bnb.BnBPartialSolution(bnbinstance)
+        bnbinstance2 = bnb.BnBPartialSolution.init_from_partial(bnbinstance)
         self.assertEqual(bnbinstance.edges, {True: [], False: []})
         self.assertEqual(bnbinstance2.edges, {True: [], False: []})
 
     def tests_constructors2(self):
         bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
         bnbinstance.lower_bound = 30
-        bnbinstance2 = bnb.BnBPartialSolution(bnbinstance)
+        bnbinstance2 = bnb.BnBPartialSolution.init_from_partial(bnbinstance)
         self.assertEqual(bnbinstance2.lower_bound, 30)
 
         bnbinstance2.lower_bound = 35
         self.assertEqual(bnbinstance2.lower_bound, 35)
 
-        bnbinstance3 = bnb.BnBPartialSolution(bnbinstance2)
+        bnbinstance3 = bnb.BnBPartialSolution.init_from_partial(bnbinstance2)
         self.assertEqual(bnbinstance3.lower_bound, 35)
 
         bnbinstance3.lower_bound = 15
@@ -100,6 +100,25 @@ class TestBnBPartialSolution(unittest.TestCase):
 
         self.assertEqual(len(bnbinstance.distance_matrix[0]), 10)
         self.assertEqual(len(bnbinstance.distance_matrix), 10)
+
+    def tests_constructors3(self):
+        bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
+        bnbinstance.lower_bound = 30
+
+        bnbinstance2 = bnb.BnBPartialSolution.init_from_partial(bnbinstance)
+        self.assertEqual(bnbinstance2.lower_bound, 30)
+
+        bnbinstance3 = bnb.BnBPartialSolution.init_from_partial(bnbinstance)
+        self.assertEqual(bnbinstance3.lower_bound, 30)
+
+        bnbinstance3.lower_bound = 50
+        bnbinstance3.solvable = False
+        self.assertEqual(bnbinstance3.lower_bound, 50)
+        self.assertEqual(bnbinstance2.lower_bound, 30)
+        self.assertEqual(bnbinstance2.solvable, True)
+
+        self.assertEqual(bnbinstance.lower_bound, 30)
+
 
     def tests_bound(self):
         self.instance.fleet.fleet.pop()
@@ -166,6 +185,32 @@ class TestBnBPartialSolution(unittest.TestCase):
         bnbinstance.routes = [[(1, 2), (2, 3), (3, 5)]]
         converted = bnbinstance.routes_edges_to_nodes()
         self.assertEqual(converted, [[1, 2, 3, 5]])
+
+    def tests_set_if_solvable(self):
+        bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
+        bnbinstance.routes = [[(3, 5), (5, 4)], [(1, 2), (2, 1)]]
+        bnbinstance.set_is_solvable()
+        self.assertEqual(False, bnbinstance.solvable)
+
+        bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
+        bnbinstance.routes = [[(3, 5)], [(1, 2), (2, 1)]]
+        bnbinstance.set_is_solvable()
+        self.assertEqual(True, bnbinstance.solvable)
+
+        bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
+        bnbinstance.routes = [[(3, 5), (5, 1)], [(1, 2), (2, 1)]]
+        bnbinstance.set_is_solvable()
+        self.assertEqual(True, bnbinstance.solvable)
+
+        bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
+        bnbinstance.routes = [[(3, 5), (5, 1)], [(1, 2), (2, 4), (4, 6)]]
+        bnbinstance.set_is_solvable()
+        self.assertEqual(False, bnbinstance.solvable)
+
+        bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
+        bnbinstance.routes = [[(1, 3), (3, 1)], [(1, 2), (2, 5), (5, 2)]]
+        bnbinstance.set_is_solvable()
+        self.assertEqual(True, bnbinstance.solvable)
 
 
 
