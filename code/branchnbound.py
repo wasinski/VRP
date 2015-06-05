@@ -203,9 +203,9 @@ class BnBPartialSolution(object):
                 if matrix[i, j] is 0:
                     continue
                 row = matrix[i, 1:].copy()
-                row[j-1] = float("inf")
+                row[j - 1] = float("inf")
                 column = matrix[1:, j].copy()
-                column[i-1] = float("inf")
+                column[i - 1] = float("inf")
                 penalty = min(row) + min(column)
                 if penalty > highest_penalty:
                     row_index = matrix[i, 0]

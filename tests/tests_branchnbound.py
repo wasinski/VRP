@@ -119,7 +119,6 @@ class TestBnBPartialSolution(unittest.TestCase):
 
         self.assertEqual(bnbinstance.lower_bound, 30)
 
-
     def tests_bound(self):
         self.instance.fleet.fleet.pop()
         self.instance.fleet.fleet.pop()
@@ -211,7 +210,6 @@ class TestBnBPartialSolution(unittest.TestCase):
         bnbinstance.routes = [[(1, 3), (3, 1)], [(1, 2), (2, 5), (5, 2)]]
         bnbinstance.set_is_solvable()
         self.assertEqual(True, bnbinstance.solvable)
-
 
 
 if __name__ == "__main__":
