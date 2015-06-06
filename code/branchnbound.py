@@ -28,7 +28,17 @@ class BranchNBound(object):
 
             self.prune_solution_space()
 
+    def branch(self, to_branch):
+        best_edge = to_branch.select_edge()
+        # left, with-branch
+        left_solution = BnBPartialSolution.init_from_partial(to_branch)
+        left_solution.with_edge_branch(best_edge)
+        left_solution.bound()  # this will go later, after infinities. it does NOT set LB!
 
+        # right, without-branch
+        right_solution = BnBPartialSolution.init_from_partial(to_branch)
+        right_solution.without_edge_branch(best_edge)
+        right_solution.bound()
 
     def pop_most_promising_solution(self):
         most_promising = self.partial_solutions[0]
@@ -66,7 +76,7 @@ class BnBPartialSolution(object):
         self.lower_bound = instance.lower_bound
         self.edges = instance.edges
         self.is_feasible = instance.is_feasible
-        self.solvable = instance.solvable
+        self.solved = instance.solved
         self.capacity = instance.capacity
 
     @classmethod
@@ -77,8 +87,8 @@ class BnBPartialSolution(object):
         cls.distance_matrix = BnBPartialSolution.convert(instance.distance_matrix, len(instance.fleet))
         cls.lower_bound = None
         cls.edges = {True: [], False: []}
-        cls.is_feasible = False
-        cls.solvable = True
+        cls.is_feasible = True
+        cls.solved = False
         cls.capacity = instance.fleet.fleet[0].capacity
         return cls(cls)
 
@@ -91,7 +101,7 @@ class BnBPartialSolution(object):
         cls.lower_bound = partial.lower_bound
         cls.edges = copy.deepcopy(partial.edges)
         cls.is_feasible = partial.edges
-        cls.solvable = partial.solvable
+        cls.solved = partial.solved
         cls.capacity = partial.capacity
         return cls(cls)
 
@@ -111,6 +121,9 @@ class BnBPartialSolution(object):
         i, j = self.edge_to_real_indexes(edge)
         matrix = np.delete(matrix, (i), axis=0)
         matrix = np.delete(matrix, (j), axis=1)
+        if self.is_leaf():
+            self.solve_leaf()
+
 
     def without_edge_branch(self, edge):
         self.edges[False].append(edge)
@@ -182,14 +195,14 @@ class BnBPartialSolution(object):
                 print("didn't found that edge in the matrix!")
                 continue
 
-    def set_is_solvable(self):  # i.e. it doesn't already break the constraints (capacity)
+    def set_is_feasible(self):  # i.e. it doesn't already break the constraints (capacity)
         routes_nodes = self.routes_edges_to_nodes()
         for route in routes_nodes:
             load = 0
             for node_id in route:
                 load += self.network.get_node(node_id).demand
                 if load > self.capacity:
-                    self.solvable = False
+                    self.is_feasible = False
 
     def routes_edges_to_nodes(self):
         DEPOT = 1

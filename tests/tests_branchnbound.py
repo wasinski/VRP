@@ -113,10 +113,10 @@ class TestBnBPartialSolution(unittest.TestCase):
         self.assertEqual(bnbinstance3.lower_bound, 30)
 
         bnbinstance3.lower_bound = 50
-        bnbinstance3.solvable = False
+        bnbinstance3.solved = True
         self.assertEqual(bnbinstance3.lower_bound, 50)
         self.assertEqual(bnbinstance2.lower_bound, 30)
-        self.assertEqual(bnbinstance2.solvable, True)
+        self.assertEqual(bnbinstance2.solved, False)
 
         self.assertEqual(bnbinstance.lower_bound, 30)
 
@@ -189,28 +189,28 @@ class TestBnBPartialSolution(unittest.TestCase):
     def tests_set_if_solvable(self):
         bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
         bnbinstance.routes = [[(3, 5), (5, 4)], [(1, 2), (2, 1)]]
-        bnbinstance.set_is_solvable()
-        self.assertEqual(False, bnbinstance.solvable)
+        bnbinstance.set_is_feasible()
+        self.assertEqual(False, bnbinstance.is_feasible)
 
         bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
         bnbinstance.routes = [[(3, 5)], [(1, 2), (2, 1)]]
-        bnbinstance.set_is_solvable()
-        self.assertEqual(True, bnbinstance.solvable)
+        bnbinstance.set_is_feasible()
+        self.assertEqual(True, bnbinstance.is_feasible)
 
         bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
         bnbinstance.routes = [[(3, 5), (5, 1)], [(1, 2), (2, 1)]]
-        bnbinstance.set_is_solvable()
-        self.assertEqual(True, bnbinstance.solvable)
+        bnbinstance.set_is_feasible()
+        self.assertEqual(True, bnbinstance.is_feasible)
 
         bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
         bnbinstance.routes = [[(3, 5), (5, 1)], [(1, 2), (2, 4), (4, 6)]]
-        bnbinstance.set_is_solvable()
-        self.assertEqual(False, bnbinstance.solvable)
+        bnbinstance.set_is_feasible()
+        self.assertEqual(False, bnbinstance.is_feasible)
 
         bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
         bnbinstance.routes = [[(1, 3), (3, 1)], [(1, 2), (2, 5), (5, 2)]]
-        bnbinstance.set_is_solvable()
-        self.assertEqual(True, bnbinstance.solvable)
+        bnbinstance.set_is_feasible()
+        self.assertEqual(True, bnbinstance.is_feasible)
 
     def tests_is_and_solve_leaf(self):
 
