@@ -24,12 +24,11 @@ class BranchNBound(object):
         # this is just a sketch
         while self.partial_solutions:
             promising_solution = self.pop_most_promising_solution()
-            self.partial_solutions.extend(promising_solution.branch())
-            self.evaluate_solution_space()
+            self.branch(promising_solution)
+
             self.prune_solution_space()
 
-    def branch(self, edge):
-        pass
+
 
     def pop_most_promising_solution(self):
         most_promising = self.partial_solutions[0]
@@ -41,7 +40,13 @@ class BranchNBound(object):
         return self.partial_solutions.pop(index)
 
     def prune(self):
-        pass
+        for solution in self.partial_solutions:
+            if solution.lower_bound >= self.upper_bound:
+                self.partial_solutions.remove(solution)
+                continue
+            if solution.solvable is False:
+                self.partial_solutions.remove(solution)
+                continue
 
     def is_more_promising(self, best, current):
         if current.lower_bound <= best.lower_bound:
@@ -54,6 +59,7 @@ class BranchNBound(object):
 class BnBPartialSolution(object):
 
     def __init__(self, instance):
+        self.lookup_matrix = instance.lookup_matrix
         self.network = instance.network
         self.routes = instance.routes
         self.distance_matrix = instance.distance_matrix
@@ -65,6 +71,7 @@ class BnBPartialSolution(object):
 
     @classmethod
     def init_from_instance(cls, instance):
+        cls.lookup_matrix = instance.distance_matrix
         cls.network = instance.network
         cls.routes = None
         cls.distance_matrix = BnBPartialSolution.convert(instance.distance_matrix, len(instance.fleet))
@@ -77,6 +84,7 @@ class BnBPartialSolution(object):
 
     @classmethod
     def init_from_partial(cls, partial):
+        cls.lookup_matrix = partial.distance_matrix
         cls.network = copy.deepcopy(partial.network)
         cls.routes = None
         cls.distance_matrix = partial.distance_matrix.copy()
@@ -146,8 +154,33 @@ class BnBPartialSolution(object):
         print (matrix)
         self.edges[True].extend([edge1, edge2])
 
-    def evaluate_solution(self):
-        pass
+    def calculate_value(self):
+        routes = self.routes_edges_to_nodes()
+        distance = 0
+        for route in routes:
+            for i, node_id in enumerate(route):
+                try:
+                    source_id = node_id
+                    destination_id = route[i + 1]
+                except IndexError:
+                    break
+                distance += self.distance_between(source_id, destination_id)
+        return distance
+
+    def distance_between(self, source_id, destination_id):
+        return self.lookup_matrix[source_id - 1][destination_id - 1]
+
+    def prevent_revisiting(self):  # puts infinities acording to the algo.
+        routes = self.routes_edges_to_nodes()
+        matrix = self.distance_matrix
+        for route in routes:
+            edge = (route[0], route[-1])
+            try:
+                i, j = self.edge_to_real_indexes(edge)
+                matrix[i, j] = float("inf")
+            except ValueError:
+                print("didn't found that edge in the matrix!")
+                continue
 
     def set_is_solvable(self):  # i.e. it doesn't already break the constraints (capacity)
         routes_nodes = self.routes_edges_to_nodes()
