@@ -283,6 +283,7 @@ class BnBPartialSolution(object):
         real_edges = self.edge_to_real_indexes(edge)
         for i, j in real_edges:
             matrix[i, j] = float("inf")
+            print("set infinity")
 
         self.distance_matrix = matrix
 
