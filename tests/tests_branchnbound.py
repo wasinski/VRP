@@ -27,6 +27,7 @@ class TestBnB(unittest.TestCase):
         ]
 
         self.solution = a.Solution(self.instance)
+
         greedy = gf.GreedyFirst(self.solution.solution)
         greedy.run(sort=False)
         self.solution.value = self.solution.calculate_value()
@@ -344,8 +345,6 @@ class TestBnBPartialSolution_2(unittest.TestCase):
         real = bnbinstance.edge_to_real_indexes((3, 6))
         self.assertEqual([], real)
 
-
-
     def tests_with_edge_branch(self):
         master = numpy.array([
                     [float("inf"), 1., 1., 2., 3., 4., 6.],
@@ -382,7 +381,9 @@ class TestBnBPartialSolution_2(unittest.TestCase):
         bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
         bnbinstance.bound()
         self.assertEqual(bnbinstance.lower_bound, 13.0)
+
         bnbinstance.without_edge_branch((3, 5))
+
         self.assertEqual(bnbinstance.edges, {True: [], False: [(3, 5)]})
         for row, row_master in zip(master, bnbinstance.distance_matrix):
             for val, val_master in zip(row, row_master):
