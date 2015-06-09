@@ -34,8 +34,8 @@ class TestBnB(unittest.TestCase):
 
     def test_run(self):
         bnb_algo = bnb.BranchNBound()
-        print("starting branchNbound with initial upper bound:" + str(self.value))
-        bnb_algo.initialize(self.instance, self.value)
+        print("starting branchNbound with initial FAKE upper bound:" + str(self.value))
+        bnb_algo.initialize(self.instance, self.value+100)
         upper_bound, routes, times_branched = bnb_algo.run()
 
         print("times branched: " + str(times_branched))
@@ -292,6 +292,59 @@ class TestBnBPartialSolution_2(unittest.TestCase):
             [5., 5., 5., 4., 0., 7., float("inf"), 1.],
             [6., 8., 8., 0., 1., 6., 0., float("inf")]
         ]
+
+    def tests_edge_to_real_indexes(self):
+        bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
+        bnbinstance.bound()
+        real = bnbinstance.edge_to_real_indexes((2, 3))
+        self.assertEqual([(3, 4)], real)
+
+        real = bnbinstance.edge_to_real_indexes((3, 5))
+        self.assertEqual([(4, 6)], real)
+
+        real = bnbinstance.edge_to_real_indexes((1, 4))
+        self.assertEqual([(1, 5), (2, 5)], real)
+
+        real = bnbinstance.edge_to_real_indexes((3, 1))
+        self.assertEqual([(4, 1), (4, 2)], real)
+
+        # after row-column deletion:
+        bnbinstance.with_edge_branch((2, 6))
+
+        real = bnbinstance.edge_to_real_indexes((3, 5))
+        self.assertEqual([(3, 6)], real)
+
+        real = bnbinstance.edge_to_real_indexes((1, 4))
+        self.assertEqual([(1, 5), (2, 5)], real)
+
+        real = bnbinstance.edge_to_real_indexes((2, 3))
+        self.assertEqual([], real)
+
+        real = bnbinstance.edge_to_real_indexes((3, 6))
+        self.assertEqual([], real)
+
+        # after another row-column deletion:
+        bnbinstance.with_edge_branch((1, 4))
+
+        real = bnbinstance.edge_to_real_indexes((3, 5))
+        self.assertEqual([(2, 5)], real)
+
+        real = bnbinstance.edge_to_real_indexes((1, 3))
+        self.assertEqual([(1, 4)], real)
+
+        real = bnbinstance.edge_to_real_indexes((3, 1))
+        self.assertEqual([(2, 1), (2, 2)], real)
+
+        real = bnbinstance.edge_to_real_indexes((1, 4))
+        self.assertEqual([], real)
+
+        real = bnbinstance.edge_to_real_indexes((2, 3))
+        self.assertEqual([], real)
+
+        real = bnbinstance.edge_to_real_indexes((3, 6))
+        self.assertEqual([], real)
+
+
 
     def tests_with_edge_branch(self):
         master = numpy.array([
