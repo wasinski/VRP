@@ -3,28 +3,47 @@ import numpy
 from code import branchnbound as bnb
 from code import instance as i
 from code import datamapping as dm
+from code import greedyfirst as gf
+from code import algorithm as a
 
 
 class TestBnB(unittest.TestCase):
 
     def setUp(self):
         raw_data = dm.Importer()
-        raw_data.import_data("./tests/cvrp1.test")
+        raw_data.import_data("./tests/cvrp2.test")
+        #raw_data.import_data("./tests/E-n23-k3.vrp")
         data = dm.DataMapper(raw_data)
 
         self.instance = i.ProblemInstance(data)
 
-    def test_initialize(self):
-        pass
+        self.instance.distance_matrix = [
+            [0, 6, 3, 1, 7, 11],
+            [6, 0, 5, 9, 6, 3],
+            [3, 5, 0, 8, 2, 4],
+            [1, 9, 8, 0, 9, 9],
+            [7, 6, 2, 9, 0, 3],
+            [11,3, 4, 9, 3, 0]
+        ]
+
+        self.solution = a.Solution(self.instance)
+        greedy = gf.GreedyFirst(self.solution.solution)
+        greedy.run(sort=False)
+        self.solution.value = self.solution.calculate_value()
+        self.value = self.solution.value
 
     def test_run(self):
-        pass
+        bnb_algo = bnb.BranchNBound()
+        print("starting branchNbound with initial upper bound:" + str(self.value))
+        bnb_algo.initialize(self.instance, self.value)
+        upper_bound, routes, times_branched = bnb_algo.run()
 
-    def test_pop_most_promising(self):
-        pass
+        print("times branched: " + str(times_branched))
+        print("value: "+ str(upper_bound))
+        print("routes: "+ str(routes))
 
 
-class TestBnBPartialSolution(unittest.TestCase):
+class TestBnBPartialSolution1(unittest.TestCase):
 
     def setUp(self):
         raw_data = dm.Importer()
@@ -243,6 +262,80 @@ class TestBnBPartialSolution(unittest.TestCase):
         self.assertTrue(bnbinstance.is_leaf())
         with self.assertRaises(ValueError):
             bnbinstance.solve_leaf()
+
+
+class TestBnBPartialSolution_2(unittest.TestCase):
+
+    def setUp(self):
+        raw_data = dm.Importer()
+        raw_data.import_data("./tests/cvrp2.test")
+        data = dm.DataMapper(raw_data)
+
+        self.instance = i.ProblemInstance(data)
+
+        self.instance.distance_matrix = [
+            [0, 6, 3, 1, 7, 11],
+            [6, 0, 5, 9, 6, 3],
+            [3, 5, 0, 8, 2, 4],
+            [1, 9, 8, 0, 9, 9],
+            [7, 6, 2, 9, 0, 3],
+            [11,3, 4, 9, 3, 0]
+        ]
+
+        self.bounded_master = [
+            [float("inf"), 1., 1., 2., 3., 4., 5., 6.],
+            [1., float("inf"), float("inf"), 5., 2., 0., 6., 10.],
+            [1., float("inf"), float("inf"), 5., 2., 0., 6., 10.],
+            [2., 3., 3., float("inf"), 2., 6., 3., 0.],
+            [3., 1., 1., 3., float("inf"), 6., 3., 0., 2.],
+            [4., 0., 0., 8., 7., float("inf"), 8., 8.],
+            [5., 5., 5., 4., 0., 7., float("inf"), 1.],
+            [6., 8., 8., 0., 1., 6., 0., float("inf")]
+        ]
+
+    def tests_with_edge_branch(self):
+        master = numpy.array([
+                    [float("inf"), 1., 1., 2., 3., 4., 6.],
+                    [1., float("inf"), float("inf"), 5., 1., 0., 10.],
+                    [1., float("inf"), float("inf"), 5., 1., 0., 10.],
+                    [2., 3., 3., float("inf"), 1., 6., 0.],
+                    [4., 0., 0., 8., 6., float("inf"), 8.],
+                    [5., 4., 4., 3., float("inf"), 6., 0.],
+                    [6., 8., 8., 0., 0., 6., float("inf")]
+                ])
+        bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
+        bnbinstance.bound()
+        self.assertEqual(bnbinstance.lower_bound, 13.0)
+        bnbinstance.with_edge_branch((3, 5))
+        self.assertEqual(bnbinstance.edges, {True: [(3, 5)], False: []})
+        for row, row_master in zip(master, bnbinstance.distance_matrix):
+            for val, val_master in zip(row, row_master):
+                self.assertEqual(val, val_master)
+        self.assertEqual(bnbinstance.lower_bound, 15.0)
+
+    def tests_without_edge_branch(self):
+        master = [
+            [float("inf"), 1., 1., 2., 3., 4., 5., 6.],
+            [1., float("inf"), float("inf"), 5., 2., 0., 6., 10.],
+            [1., float("inf"), float("inf"), 5., 2., 0., 6., 10.],
+            [2., 3., 3., float("inf"), 2., 6., 3., 0.],
+            [3., 0., 0., 2., float("inf"), 5., float("inf"), 1.],
+            [4., 0., 0., 8., 7., float("inf"), 8., 8.],
+            [5., 5., 5., 4., 0., 7., float("inf"), 1.],
+            [6., 8., 8., 0., 1., 6., 0., float("inf")]
+        ]
+        master = numpy.array(master)
+
+        bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)
+        bnbinstance.bound()
+        self.assertEqual(bnbinstance.lower_bound, 13.0)
+        bnbinstance.without_edge_branch((3, 5))
+        self.assertEqual(bnbinstance.edges, {True: [], False: [(3, 5)]})
+        for row, row_master in zip(master, bnbinstance.distance_matrix):
+            for val, val_master in zip(row, row_master):
+                self.assertEqual(val, val_master)
+
+        self.assertEqual(bnbinstance.lower_bound, 14.0)
 
 
 if __name__ == "__main__":

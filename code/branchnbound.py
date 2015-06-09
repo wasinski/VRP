@@ -10,35 +10,48 @@ class BranchNBound(object):
         Additionally routes for every vehicle are constructed at end of every iteration
             and solutions that wont be feasible are detected, and pruned.
     """
-    def __init__(self, instance):
+    def __init__(self):
         self.partial_solutions = []
         self.upper_bound = None
         self.current_best = None
         self.times_branched = 0
         self.initial_upper_bound = None
 
-    def initialize(self, someArguments):
-        pass
+    def initialize(self, instance, upper_bound=None):
+        first_partial = BnBPartialSolution.init_from_instance(instance)
+        first_partial.bound()
+        self.upper_bound = upper_bound
+        self.initial_upper_bound = upper_bound
+        self.current_best = first_partial
+        self.partial_solutions.append(first_partial)
 
     def run(self):
-        # this is just a sketch
         while self.partial_solutions:
             promising_solution = self.pop_most_promising_solution()
+            print("promising_print, lowerb: "+ str(promising_solution.lower_bound))
+            print("promising_print, edges: ")
+            print(str(promising_solution.edges))
+            print("promising_print, matrix: ")
+            print(str(promising_solution.distance_matrix))
             self.branch(promising_solution)
+            self.times_branched += 1
+            self.prune()
+            if self.times_branched > 200:
+                break
 
-            self.prune_solution_space()
+        return (self.upper_bound, self.current_best.routes, self.times_branched)
 
     def branch(self, to_branch):
         best_edge = to_branch.select_edge()
         # left, with-branch
         left_solution = BnBPartialSolution.init_from_partial(to_branch)
         left_solution.with_edge_branch(best_edge)
-        left_solution.bound()  # this will go later, after infinities. it does NOT set LB!
+        self.partial_solutions.append(left_solution)
 
         # right, without-branch
         right_solution = BnBPartialSolution.init_from_partial(to_branch)
         right_solution.without_edge_branch(best_edge)
-        right_solution.bound()
+        self.partial_solutions.append(right_solution)
 
     def pop_most_promising_solution(self):
         most_promising = self.partial_solutions[0]
@@ -51,11 +64,25 @@ class BranchNBound(object):
 
     def prune(self):
         for solution in self.partial_solutions:
+            if solution.is_solved():
+                if solution.is_feasible:
+                    print("found feasible solution!")
+                    print(solution.distance_matrix)
+                    print(solution.routes)
+                    value = solution.calculate_value()
+                    if value < self.upper_bound:
+                        self.upper_bound = value
+                        self.current_best = solution
+                self.partial_solutions.remove(solution)
+                print(" solved - pruned")
+                continue
             if solution.lower_bound >= self.upper_bound:
                 self.partial_solutions.remove(solution)
+                print(" fattom - pruned, lower="+str(solution.lower_bound)+" upper="+str(self.upper_bound))
                 continue
-            if solution.solvable is False:
+            if solution.is_feasible is False:
                 self.partial_solutions.remove(solution)
+                print(" won't be feasible - pruned")
                 continue
 
     def is_more_promising(self, best, current):
@@ -81,11 +108,11 @@ class BnBPartialSolution(object):
 
     @classmethod
     def init_from_instance(cls, instance):
-        cls.lookup_matrix = instance.distance_matrix
+        cls.lookup_matrix = np.array(instance.distance_matrix)
         cls.network = instance.network
         cls.routes = None
         cls.distance_matrix = BnBPartialSolution.convert(instance.distance_matrix, len(instance.fleet))
-        cls.lower_bound = None
+        cls.lower_bound = 0
         cls.edges = {True: [], False: []}
         cls.is_feasible = True
         cls.solved = False
@@ -94,8 +121,8 @@ class BnBPartialSolution(object):
 
     @classmethod
     def init_from_partial(cls, partial):
-        cls.lookup_matrix = partial.distance_matrix
-        cls.network = copy.deepcopy(partial.network)
+        cls.lookup_matrix = partial.lookup_matrix
+        cls.network = partial.network #mała zmiana! było deepcopy
         cls.routes = None
         cls.distance_matrix = partial.distance_matrix.copy()
         cls.lower_bound = partial.lower_bound
@@ -112,25 +139,50 @@ class BnBPartialSolution(object):
         matrix[1:, 1:] -= row_minimums
         column_minimums = matrix[1:, 1:].min(axis=0)
         matrix[1:, 1:] -= column_minimums
-        lower_bound = sum(row_minimums) + sum(column_minimums)
+        lower_bound = float(sum(row_minimums) + sum(column_minimums))
+        try:
+            self.lower_bound += lower_bound
+        except TypeError:
+            print("first lower bound calculation")
+            self.lower_bound = lower_bound
         return lower_bound
 
     def with_edge_branch(self, edge):
+        if edge in self.edges[True]:
+            self.is_feasible = False
+            return # ciekawe czy zadziala
         self.edges[True].append(edge)
         matrix = self.distance_matrix
         i, j = self.edge_to_real_indexes(edge)
         matrix = np.delete(matrix, (i), axis=0)
         matrix = np.delete(matrix, (j), axis=1)
+        self.distance_matrix = matrix
         if self.is_leaf():
             self.solve_leaf()
+            if self.is_solved():
+                self.construct_routes()
+                self.set_is_feasible()
+            else:
+                self.is_feasible = False
+        else:
+            self.construct_routes()
+            self.prevent_revisiting()
+            self.bound()
+            self.set_is_feasible()
 
+    def is_solved(self):
+        return self.solved
 
     def without_edge_branch(self, edge):
+        if edge in self.edges[False]:
+            self.is_feasible = False
+            return # ciekawe czy zadziala
         self.edges[False].append(edge)
         matrix = self.distance_matrix
         i, j = self.edge_to_real_indexes(edge)
         matrix[i, j] = float("inf")
-        self.evaluate_solution()
+        self.distance_matrix = matrix
+        self.bound()
 
     def is_leaf(self):
         if len(self.distance_matrix) is 3:
@@ -151,7 +203,6 @@ class BnBPartialSolution(object):
         else:
             raise ValueError
         edge1 = (row_index, col_index)
-        print (edge1)
 
         row_index = matrix[2, 0]
         col_index = None
@@ -162,10 +213,8 @@ class BnBPartialSolution(object):
         else:
             raise ValueError
         edge2 = (row_index, col_index)
-        print (edge2)
-        print ([edge1, edge2])
-        print (matrix)
         self.edges[True].extend([edge1, edge2])
+        self.solved = True
 
     def calculate_value(self):
         routes = self.routes_edges_to_nodes()
@@ -181,26 +230,29 @@ class BnBPartialSolution(object):
         return distance
 
     def distance_between(self, source_id, destination_id):
-        return self.lookup_matrix[source_id - 1][destination_id - 1]
+        print("tak wyglada lookup matrix")
+        print (self.lookup_matrix)
+        return self.lookup_matrix[source_id - 1, destination_id - 1]
 
     def prevent_revisiting(self):  # puts infinities acording to the algo.
         routes = self.routes_edges_to_nodes()
         matrix = self.distance_matrix
         for route in routes:
-            edge = (route[0], route[-1])
+            edge = (route[-1], route[0])
             try:
                 i, j = self.edge_to_real_indexes(edge)
                 matrix[i, j] = float("inf")
             except ValueError:
                 print("didn't found that edge in the matrix!")
                 continue
+        self.distance_matrix = matrix
 
     def set_is_feasible(self):  # i.e. it doesn't already break the constraints (capacity)
         routes_nodes = self.routes_edges_to_nodes()
         for route in routes_nodes:
             load = 0
             for node_id in route:
-                load += self.network.get_node(node_id).demand
+                load += self.network.get_node(int(node_id)).demand
                 if load > self.capacity:
                     self.is_feasible = False
 
@@ -258,7 +310,7 @@ class BnBPartialSolution(object):
             if not inserted:  # put it on the beginning of the queue for #times or...@down
                 try:
                     memo[edge] += 1
-                    if memo[edge] > 3:
+                    if memo[edge] > 10:
                         routes.append([edge])  # or create a sperate, new route
                     else:
                         edges.appendleft(edge)
@@ -287,7 +339,6 @@ class BnBPartialSolution(object):
                     col_index = matrix[0, j]
                     highest_penalty = penalty
                     best_edge = (row_index, col_index)
-
         return best_edge
 
     def convert(matrix, fleet_size):
