@@ -47,6 +47,8 @@ class BranchNBound(object):
     def branch(self, to_branch):
         best_edge = to_branch.select_edge()
         print("selected edge: "+str(best_edge))
+        if None in best_edge:
+            return
         # left, with-branch
         left_solution = BnBPartialSolution.init_from_partial(to_branch)
         left_solution.with_edge_branch(best_edge)
@@ -380,7 +382,7 @@ class BnBPartialSolution(object):
                 column = matrix[1:, j].copy()
                 column[i - 1] = float("inf")
                 penalty = min(row) + min(column)
-                if highest_penalty <= penalty < float("inf"):
+                if highest_penalty <= penalty:
                     row_index = int(matrix[i, 0])
                     col_index = int(matrix[0, j])
                     edge = (row_index, col_index)
