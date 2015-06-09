@@ -30,18 +30,16 @@ class BranchNBound(object):
     def run(self):
         while self.partial_solutions:
             promising_solution = self.pop_most_promising_solution()
-            print("-----------------------")
             print("pp, lowerb: "+ str(promising_solution.lower_bound))
             print("pp, edges: ")
             print(str(promising_solution.edges))
             print("pp, matrix: ")
             print(str(promising_solution.distance_matrix))
             self.branch(promising_solution)
-            self.times_branched += 1
             self.prune()
             # if self.times_branched == 100:
             #     break
-
+            print("-----------------------")
         return (self.upper_bound, self.current_best.routes, self.times_branched)
 
     def branch(self, to_branch):
@@ -60,6 +58,8 @@ class BranchNBound(object):
         right_solution.without_edge_branch(best_edge)
         if right_solution.is_acceptable(self.upper_bound):
             self.partial_solutions.append(right_solution)
+
+        self.times_branched += 1
 
     def pop_most_promising_solution(self):
         most_promising = self.partial_solutions[0]
@@ -86,6 +86,10 @@ class BranchNBound(object):
             if solution.leaf:
                 first_solution = BnBPartialSolution(solution)
                 second_solution = BnBPartialSolution(solution)
+                self.partial_solutions.remove(solution)
+                print("leaf to solve:")
+                print(solution.distance_matrix)
+                print(solution.edges)
                 try:
                     first_solution.solve_leaf_first()
                     first_solution.construct_routes()
@@ -97,9 +101,9 @@ class BranchNBound(object):
                     # print("and converted:")
                     # print(first_solution.routes_edges_to_nodes())
                     if first_solution.is_feasible:
-                        #print("it is feasible!")
+                        # print("it is feasible!")
                         value = first_solution.calculate_value()
-                        #print("value: " + str(value))
+                        # print("value: " + str(value))
                         if value < self.upper_bound:
                             self.upper_bound = value
                             self.current_best = first_solution
@@ -116,15 +120,15 @@ class BranchNBound(object):
                     # print("and converted:")
                     # print(second_solution.routes_edges_to_nodes())
                     if second_solution.is_feasible:
-                        #print("it is feasible!")
+                        # print("it is feasible!")
                         value = second_solution.calculate_value()
+                        # print("value: " + str(value))
                         if value < self.upper_bound:
                             self.upper_bound = value
                             self.current_best = second_solution
                 except ValueError:
                     pass
 
-                self.partial_solutions.remove(solution)
                 print(" was leaf - solved - pruned")
                 continue
 
@@ -212,6 +216,7 @@ class BnBPartialSolution(object):
 
         if self.set_infinities(reversed_edge):
             self.edges[False].append(reversed_edge)
+
         if self.is_leaf():
             self.leaf = True
 
@@ -358,7 +363,7 @@ class BnBPartialSolution(object):
             if not inserted:  # put it on the beginning of the queue for #times or...@down
                 try:
                     memo[edge] += 1
-                    if memo[edge] > 10:
+                    if memo[edge] > 50:
                         routes.append([edge])  # or create a sperate, new route
                     else:
                         edges.appendleft(edge)
