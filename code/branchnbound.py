@@ -1,6 +1,8 @@
 import collections
 import numpy as np
 import copy
+# TODO: byc moze trzeba bedzie dopracowac is_feasible zeby sprawdzalo
+# czy sciezki są unikatowe
 
 
 class BranchNBound(object):
@@ -64,22 +66,56 @@ class BranchNBound(object):
 
     def prune(self):
         for solution in self.partial_solutions:
-            if solution.is_solved():
-                if solution.is_feasible:
+            if solution.leaf:
+                first_solution = BnBPartialSolution(solution)
+                second_solution = BnBPartialSolution(solution)
+                try:
+                    first_solution.solve_leaf_first()
+                    first_solution.construct_routes()
+                    first_solution.set_is_feasible()
                     print("found feasible solution!")
-                    print(solution.distance_matrix)
-                    print(solution.routes)
-                    value = solution.calculate_value()
-                    if value < self.upper_bound:
-                        self.upper_bound = value
-                        self.current_best = solution
+                    print(first_solution.edges)
+                    print("that gives a route:")
+                    print(first_solution.routes)
+                    print("and converted:")
+                    print(first_solution.routes_edges_to_nodes())
+                    if first_solution.is_feasible:
+                        print("it is feasible!")
+                        value = first_solution.calculate_value()
+                        print("value: " + str(value))
+                        if value < self.upper_bound:
+                            self.upper_bound = value
+                            self.current_best = first_solution
+                except ValueError:
+                    pass
+                try:
+                    second_solution.solve_leaf_second()
+                    second_solution.construct_routes()
+                    second_solution.set_is_feasible()
+                    print("found feasible solution!")
+                    print(second_solution.edges)
+                    print("that gives a route:")
+                    print(second_solution.routes)
+                    print("and converted:")
+                    print(second_solution.routes_edges_to_nodes())
+                    if second_solution.is_feasible:
+                        print("it is feasible!")
+                        value = second_solution.calculate_value()
+                        if value < self.upper_bound:
+                            self.upper_bound = value
+                            self.current_best = second_solution
+                except ValueError:
+                    pass
+
                 self.partial_solutions.remove(solution)
-                print(" solved - pruned")
+                print(" was leaf - solved - pruned")
                 continue
+
             if solution.lower_bound >= self.upper_bound:
                 self.partial_solutions.remove(solution)
                 print(" fattom - pruned, lower="+str(solution.lower_bound)+" upper="+str(self.upper_bound))
                 continue
+
             if solution.is_feasible is False:
                 self.partial_solutions.remove(solution)
                 print(" won't be feasible - pruned")
@@ -103,7 +139,7 @@ class BnBPartialSolution(object):
         self.lower_bound = instance.lower_bound
         self.edges = instance.edges
         self.is_feasible = instance.is_feasible
-        self.solved = instance.solved
+        self.leaf = instance.leaf
         self.capacity = instance.capacity
 
     @classmethod
@@ -112,10 +148,10 @@ class BnBPartialSolution(object):
         cls.network = instance.network
         cls.routes = None
         cls.distance_matrix = BnBPartialSolution.convert(instance.distance_matrix, len(instance.fleet))
-        cls.lower_bound = 0
+        cls.lower_bound = None
         cls.edges = {True: [], False: []}
         cls.is_feasible = True
-        cls.solved = False
+        cls.leaf = False
         cls.capacity = instance.fleet.fleet[0].capacity
         return cls(cls)
 
@@ -128,7 +164,7 @@ class BnBPartialSolution(object):
         cls.lower_bound = partial.lower_bound
         cls.edges = copy.deepcopy(partial.edges)
         cls.is_feasible = partial.edges
-        cls.solved = partial.solved
+        cls.leaf = partial.leaf
         cls.capacity = partial.capacity
         return cls(cls)
 
@@ -136,21 +172,23 @@ class BnBPartialSolution(object):
         matrix = self.distance_matrix
         row_minimums = matrix[1:, 1:].min(axis=1)
         row_minimums = row_minimums[:, np.newaxis]
+        for i, minimum in enumerate(row_minimums):
+            if minimum == float("inf"):
+                row_minimums[i] = 0
         matrix[1:, 1:] -= row_minimums
         column_minimums = matrix[1:, 1:].min(axis=0)
+        for i, minimum in enumerate(column_minimums):
+            if minimum == float("inf"):
+                column_minimums[i] = 0
         matrix[1:, 1:] -= column_minimums
         lower_bound = float(sum(row_minimums) + sum(column_minimums))
         try:
             self.lower_bound += lower_bound
         except TypeError:
-            print("first lower bound calculation")
             self.lower_bound = lower_bound
         return lower_bound
 
     def with_edge_branch(self, edge):
-        if edge in self.edges[True]:
-            self.is_feasible = False
-            return # ciekawe czy zadziala
         self.edges[True].append(edge)
         matrix = self.distance_matrix
         i, j = self.edge_to_real_indexes(edge)
@@ -158,31 +196,23 @@ class BnBPartialSolution(object):
         matrix = np.delete(matrix, (j), axis=1)
         self.distance_matrix = matrix
         if self.is_leaf():
-            self.solve_leaf()
-            if self.is_solved():
-                self.construct_routes()
-                self.set_is_feasible()
-            else:
-                self.is_feasible = False
-        else:
-            self.construct_routes()
-            self.prevent_revisiting()
-            self.bound()
-            self.set_is_feasible()
+            self.leaf = True
 
-    def is_solved(self):
-        return self.solved
+        self.construct_routes()
+        self.prevent_revisiting()
+        self.bound()
+        self.set_is_feasible()
 
     def without_edge_branch(self, edge):
-        if edge in self.edges[False]:
-            self.is_feasible = False
-            return # ciekawe czy zadziala
+        #if edge not in self.edges[False]:
         self.edges[False].append(edge)
         matrix = self.distance_matrix
         i, j = self.edge_to_real_indexes(edge)
         matrix[i, j] = float("inf")
         self.distance_matrix = matrix
         self.bound()
+        # else:
+        #     self.is_feasible = False
 
     def is_leaf(self):
         if len(self.distance_matrix) is 3:
@@ -192,29 +222,27 @@ class BnBPartialSolution(object):
         else:
             return False
 
-    def solve_leaf(self):
+    def solve_leaf_first(self):
         matrix = self.distance_matrix
-        row_index = matrix[1, 0]
-        col_index = None
-        if not matrix[1, 1] == float("inf"):
-            col_index = matrix[0, 1]
-        elif not matrix[1, 2] == float("inf"):
-            col_index = matrix[0, 2]
-        else:
-            raise ValueError
-        edge1 = (row_index, col_index)
 
-        row_index = matrix[2, 0]
-        col_index = None
-        if not matrix[2, 1] == float("inf"):
-            col_index = matrix[0, 1]
-        elif not matrix[2, 2] == float("inf"):
-            col_index = matrix[0, 2]
+        if 0 <= matrix[1, 1] < float("inf"):
+            if 0 <= matrix[2, 2] < float("inf"):
+                edge1 = (int(matrix[1, 0]), int(matrix[0, 1]))
+                edge2 = (int(matrix[2, 0]), int(matrix[0, 2]))
+                self.edges[True].extend([edge1, edge2])
         else:
             raise ValueError
-        edge2 = (row_index, col_index)
-        self.edges[True].extend([edge1, edge2])
-        self.solved = True
+
+    def solve_leaf_second(self):
+        matrix = self.distance_matrix
+
+        if 0 <= matrix[1, 2] < float("inf"):
+            if 0 <= matrix[2, 1] < float("inf"):
+                edge1 = (int(matrix[1, 0]), int(matrix[0, 2]))
+                edge2 = (int(matrix[2, 0]), int(matrix[0, 1]))
+                self.edges[True].extend([edge1, edge2])
+        else:
+            raise ValueError
 
     def calculate_value(self):
         routes = self.routes_edges_to_nodes()
@@ -230,8 +258,6 @@ class BnBPartialSolution(object):
         return distance
 
     def distance_between(self, source_id, destination_id):
-        print("tak wyglada lookup matrix")
-        print (self.lookup_matrix)
         return self.lookup_matrix[source_id - 1, destination_id - 1]
 
     def prevent_revisiting(self):  # puts infinities acording to the algo.
@@ -242,6 +268,10 @@ class BnBPartialSolution(object):
             try:
                 i, j = self.edge_to_real_indexes(edge)
                 matrix[i, j] = float("inf")
+                if edge not in self.edges[False]:
+                    self.edges[False].append(edge)
+                else:
+                    "to juz bylo!"
             except ValueError:
                 print("didn't found that edge in the matrix!")
                 continue
@@ -335,10 +365,13 @@ class BnBPartialSolution(object):
                 column[i - 1] = float("inf")
                 penalty = min(row) + min(column)
                 if penalty > highest_penalty:
-                    row_index = matrix[i, 0]
-                    col_index = matrix[0, j]
+                    row_index = int(matrix[i, 0])
+                    col_index = int(matrix[0, j])
+                    edge = (row_index, col_index)
+                    #if edge not in self.edges[False]:
+                    #if edge not in self.edges[False]:
                     highest_penalty = penalty
-                    best_edge = (row_index, col_index)
+                    best_edge = edge
         return best_edge
 
     def convert(matrix, fleet_size):

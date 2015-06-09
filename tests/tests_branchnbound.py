@@ -132,10 +132,10 @@ class TestBnBPartialSolution1(unittest.TestCase):
         self.assertEqual(bnbinstance3.lower_bound, 30)
 
         bnbinstance3.lower_bound = 50
-        bnbinstance3.solved = True
+        bnbinstance3.leaf = True
         self.assertEqual(bnbinstance3.lower_bound, 50)
         self.assertEqual(bnbinstance2.lower_bound, 30)
-        self.assertEqual(bnbinstance2.solved, False)
+        self.assertEqual(bnbinstance2.leaf, False)
 
         self.assertEqual(bnbinstance.lower_bound, 30)
 
@@ -244,7 +244,7 @@ class TestBnBPartialSolution1(unittest.TestCase):
                                                   [1, 2, float("inf")],
                                                   [2, float("inf"), 0]])
         self.assertTrue(bnbinstance.is_leaf())
-        bnbinstance.solve_leaf()
+        bnbinstance.solve_leaf_first()
         self.assertEqual(bnbinstance.edges[True], [(1, 0), (2, 1)])
 
         bnbinstance.distance_matrix = numpy.array([[float("inf"), 0, 3],
@@ -252,7 +252,7 @@ class TestBnBPartialSolution1(unittest.TestCase):
                                                   [2, 0, float("inf")]])
         bnbinstance.edges = {True: [], False: []}
         self.assertTrue(bnbinstance.is_leaf())
-        bnbinstance.solve_leaf()
+        bnbinstance.solve_leaf_second()
         self.assertEqual(bnbinstance.edges[True], [(1, 3), (2, 0)])
 
         bnbinstance.distance_matrix = numpy.array([[float("inf"), 0, 3],
@@ -261,7 +261,7 @@ class TestBnBPartialSolution1(unittest.TestCase):
         bnbinstance.edges = {True: [], False: []}
         self.assertTrue(bnbinstance.is_leaf())
         with self.assertRaises(ValueError):
-            bnbinstance.solve_leaf()
+            bnbinstance.solve_leaf_first()
 
 
 class TestBnBPartialSolution_2(unittest.TestCase):
@@ -307,7 +307,7 @@ class TestBnBPartialSolution_2(unittest.TestCase):
         bnbinstance.bound()
         self.assertEqual(bnbinstance.lower_bound, 13.0)
         bnbinstance.with_edge_branch((3, 5))
-        self.assertEqual(bnbinstance.edges, {True: [(3, 5)], False: []})
+        self.assertEqual(bnbinstance.edges, {True: [(3, 5)], False: [(5, 3)]})
         for row, row_master in zip(master, bnbinstance.distance_matrix):
             for val, val_master in zip(row, row_master):
                 self.assertEqual(val, val_master)
