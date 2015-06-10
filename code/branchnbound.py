@@ -4,6 +4,8 @@ import copy
 # TODO: byc moze trzeba bedzie dopracowac is_feasible zeby sprawdzalo
 # czy sciezki są unikatowe
 
+DEPOT = 1
+
 
 class BranchNBound(object):
     """ Branch and bound implementation
@@ -94,12 +96,12 @@ class BranchNBound(object):
                     first_solution.solve_leaf_first()
                     first_solution.construct_routes()
                     first_solution.set_is_feasible()
-                    # print("found feasible solution!")
-                    # print(first_solution.edges)
-                    # print("that gives a route:")
-                    # print(first_solution.routes)
-                    # print("and converted:")
-                    # print(first_solution.routes_edges_to_nodes())
+                    print("found feasible solution!")
+                    print(first_solution.edges)
+                    print("that gives a route:")
+                    print(first_solution.routes)
+                    print("and converted:")
+                    print(first_solution.routes_edges_to_nodes())
                     if first_solution.is_feasible:
                         # print("it is feasible!")
                         value = first_solution.calculate_value()
@@ -213,9 +215,9 @@ class BnBPartialSolution(object):
         matrix = np.delete(matrix, (i), axis=0)
         matrix = np.delete(matrix, (j), axis=1)
         self.distance_matrix = matrix
-
-        if self.set_infinities(reversed_edge):
-            self.edges[False].append(reversed_edge)
+        if DEPOT not in reversed_edge:
+            if self.set_infinities(reversed_edge):
+                self.edges[False].append(reversed_edge)
 
         if self.is_leaf():
             self.leaf = True
@@ -283,8 +285,9 @@ class BnBPartialSolution(object):
                 continue  # 2 element routes should be delt sooner.
 
             edge = (route[-1], route[0])
-            if self.set_infinities(edge):
-                self.edges[False].append(edge)
+            if DEPOT not in edge:
+                if self.set_infinities(edge):
+                    self.edges[False].append(edge)
 
     def set_is_feasible(self):  # i.e. it doesn't already break the constraints (capacity)
         routes_nodes = self.routes_edges_to_nodes()
@@ -340,38 +343,43 @@ class BnBPartialSolution(object):
         return real_edges
 
     def construct_routes(self):
-        DEPOT = 1
         routes = []
-        edges = collections.deque(self.edges[True])
-        memo = {}
-        routes.append([edges.pop()])
-        while edges:
-            edge = edges.pop()
-            inserted = False
-            for route in routes:
-                for i, route_edge in enumerate(route):
-                    if edge[1] == route_edge[0] and edge[1] is not DEPOT:
-                        if i == 0 or route[i - 1][1] == edge[0]:
-                            route.insert(i, edge)
-                            inserted = True
-                            break
-                    elif route_edge[1] == edge[0] and edge[0] is not DEPOT:
-                        if (i == len(route) - 1) or edge[1] == route[i + 1][0]:
-                            route.insert(i + 1, edge)
-                            inserted = True
-                            break
-            if not inserted:  # put it on the beginning of the queue for #times or...@down
+        edges = copy.deepcopy(self.edges[True])
+
+        route = []
+        route.append(edges.pop())
+        found_match = True
+        while True:
+            found_match = False
+            on_start = None
+            index = None
+            end = route[-1][1]
+            start = route[0][0]
+
+            for i, edge in enumerate(edges):
+                if edge[0] == end and end is not DEPOT:
+                    found_match = True
+                    on_start = False
+                    index = i
+                elif edge[1] == start and start is not DEPOT:
+                    found_match = True
+                    on_start = True
+                    index = i
+
+            if found_match:
+                edge = edges.pop(index)
+                if on_start:
+                    route.insert(0, edge)
+                else:
+                    route.append(edge)
+            else:
+                routes.append(route)
+                route = []
                 try:
-                    memo[edge] += 1
-                    if memo[edge] > 50:
-                        routes.append([edge])  # or create a sperate, new route
-                    else:
-                        edges.appendleft(edge)
-                except KeyError:
-                    memo[edge] = 1
-                    edges.appendleft(edge)
-            # TODO: it might be better to check if there are already matching edges in the queue than
-            # to use a $memo.
+                    route.append(edges.pop())
+                except IndexError:
+                    break
+
         self.routes = routes
 
     def select_edge(self):
