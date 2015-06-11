@@ -11,20 +11,48 @@ class TestBnB(unittest.TestCase):
 
     def setUp(self):
         raw_data = dm.Importer()
-        raw_data.import_data("./tests/cvrp2.test")
+        #raw_data.import_data("./tests/cvrp2.test")
+        #raw_data.import_data("./tests/ulysses-n16-k3.vrp")
         #raw_data.import_data("./tests/E-n23-k3.vrp")
+        #raw_data.import_data("./tests/cvrp3.test")
+        raw_data.import_data("./tests/P-n19-k2.vrp")
         data = dm.DataMapper(raw_data)
 
         self.instance = i.ProblemInstance(data)
 
-        self.instance.distance_matrix = [
-            [0, 6, 3, 1, 7, 11],
-            [6, 0, 5, 9, 6, 3],
-            [3, 5, 0, 8, 2, 4],
-            [1, 9, 8, 0, 9, 9],
-            [7, 6, 2, 9, 0, 3],
-            [11,3, 4, 9, 3, 0]
-        ]
+        # self.instance.distance_matrix = [ # for E-n13-k4!
+        #     [0, 9, 14, 23, 32, 50, 21, 49, 30, 27, 35, 28, 18],
+        #     [9, 0, 21, 22, 36, 52, 24, 51, 36, 37, 41, 30, 20],
+        #     [14, 21, 0, 25, 38, 5, 31, 7, 36, 43, 29, 7, 6],
+        #     [23, 22, 25, 0, 42, 12, 35, 17, 44, 31, 31, 11, 6],
+        #     [32, 36, 38, 42, 0, 22, 37, 16, 46, 37, 29, 23, 14],
+        #     [50, 52, 5, 12, 22, 0, 41, 23, 10, 39, 9, 17, 16],
+        #     [21, 24, 31, 35, 37, 41, 0, 26, 21, 19, 10, 25, 12],
+        #     [49, 51, 7, 17, 16, 23, 26, 0, 30, 28, 16, 27, 12],
+        #     [30, 36, 36, 44, 46, 10, 21, 30, 0, 25, 22, 10, 20],
+        #     [27, 37, 43, 31, 37, 39, 19, 28, 25, 0, 20, 16, 8],
+        #     [35, 41, 29, 31, 29, 9, 10, 16, 22, 20, 0, 10, 10],
+        #     [28, 30, 7, 11, 13, 17, 25, 27, 10, 16, 10, 0, 10],
+        #     [18, 20, 6, 6, 14, 16, 12, 12, 20, 8, 10, 10, 0]
+        # ]
+
+        # self.instance.distance_matrix = [
+        #     [0, 6, 3, 1, 7, 1],
+        #     [6, 0, 1, 9, 6, 3],
+        #     [3, 5, 0, 8, 1, 4],
+        #     [1, 9, 8, 0, 9, 9],
+        #     [1, 9, 2, 9, 0, 9],
+        #     [11,1, 4, 9, 3, 0]
+        # ]
+
+        # self.instance.distance_matrix = [
+        #     [0, 6, 3, 1, 7, 11],
+        #     [6, 0, 5, 9, 6, 3],
+        #     [3, 5, 0, 8, 2, 4],
+        #     [1, 9, 8, 0, 9, 9],
+        #     [7, 6, 2, 9, 0, 3],
+        #     [11,3, 4, 9, 3, 0]
+        # ]
 
         self.solution = a.Solution(self.instance)
 
@@ -35,13 +63,14 @@ class TestBnB(unittest.TestCase):
 
     def test_run(self):
         bnb_algo = bnb.BranchNBound()
-        print("starting branchNbound with initial FAKE upper bound:" + str(self.value))
-        bnb_algo.initialize(self.instance, self.value+100)
-        upper_bound, routes, times_branched = bnb_algo.run()
+        print("starting branchNbound with initial upper bound:" + str(self.value))
+        bnb_algo.initialize(self.instance, self.value)
+        upper_bound, routes, edges, times_branched = bnb_algo.run()
 
         print("times branched: " + str(times_branched))
         print("value: "+ str(upper_bound))
         print("routes: "+ str(routes))
+        print("edges:"+ str(edges))
 
 
 class TestBnBPartialSolution1(unittest.TestCase):
@@ -191,6 +220,14 @@ class TestBnBPartialSolution1(unittest.TestCase):
         bnbinstance.edges = {True: [(1, 3), (2, 5), (1, 4), (5, 1), (6, 1)], False: []}
         bnbinstance.construct_routes()
         self.assertEqual(bnbinstance.routes, [[(6, 1)], [(2, 5), (5, 1)], [(1, 4)], [(1, 3)]])
+
+        bnbinstance.edges = {True: [(6, 2), (3, 5), (5, 6), (4, 1), (2, 1), (1, 3), (1, 4)], False: []}
+        bnbinstance.construct_routes()
+        self.assertEqual(bnbinstance.routes, [[(1, 4), (4, 1)], [(1, 3), (3, 5), (5, 6), (6, 2), (2, 1)]])
+        print("this interests me")
+        bnbinstance.edges = {True: [(21, 23), (18, 15), (23, 18), (5, 22), (12, 1), (1, 13), (1, 8), (14, 11), (10, 1), (11, 10), (1, 14), (19, 20), (20, 21), (6, 5), (9, 6), (2, 7), (16, 17), (15, 16), (13, 1), (4, 3), (3, 2), (17, 4), (7, 12), (22, 19), (8, 9)]}
+        bnbinstance.construct_routes()
+        self.assertEqual(bnbinstance.routes, [[(1, 8), (8, 9), (9, 6), (6, 5), (5, 22), (22, 19), (19, 20), (20, 21), (21, 23), (23, 18), (18, 15), (15, 16), (16, 17), (17, 4), (4, 3), (3, 2), (2, 7), (7, 12), (12, 1)], [(1, 13), (13, 1)], [(1, 14), (14, 11), (11, 10), (10, 1)]])
 
     def tests_routes_edges_to_nodes(self):
         bnbinstance = bnb.BnBPartialSolution.init_from_instance(self.instance)

@@ -61,7 +61,7 @@ class Importer(object):
 
         for i, line in enumerate(my_filelines):
             if start < i < middle:
-                splited = line.split(' ')
+                splited = line.strip().split(' ')
                 splited = list(map(float, splited))
                 node_coordinates_list.append((splited[1], splited[2]))
 
