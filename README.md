@@ -1,4 +1,4 @@
-This is an aplication/framework (will see how this gonna work out) for solving capacitated vehicle routing problem.
+This is an app for solving capacitated vehicle routing problem.
 
 For now the working part are only the tests ;)
 Current funcionality:
