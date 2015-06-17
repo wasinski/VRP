@@ -39,11 +39,17 @@ class TabuSearch(object):
         between.reverse()
         new_route.extend(between)
         new_route.extend(route[k+1:])
-        print(new_route)
         return new_route
 
-    def swap_intra(self, source_route, dest_route, node_id, position):
-        pass
+    def swap_intra(self, source_route, dest_route, node_id, position=None):
+        print(dest_route)
+        if position is None:
+            position = len(dest_route) - 1
+        if node_id is DEPOT:
+            raise ValueError
+        swap_node = source_route.pop_node_id(node_id)
+        dest_route.insert_node(position, swap_node)
+        return dest_route
 
     def choose_edge(self):
         pass
@@ -57,7 +63,6 @@ class TabuSearch(object):
 
     def calculate_value(self):
         pass
-
 
 
 class ParallelTS(object):

@@ -171,6 +171,9 @@ class Route(object):
     def __getitem__(self, key):
         return self.route[key]
 
+    def __len__(self):
+        return len(self.route)
+
     def __deepcopy__(self, memo):
         return copy.deepcopy(self.route, memo={})
 
