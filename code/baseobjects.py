@@ -196,6 +196,12 @@ class Route(object):
                     return self.route.pop(i)
         raise ValueError  # if node not found
 
+    def get_node_position(self, id_):
+        for i, node in enumerate(self.route):
+            if node.id == id_:
+                return i
+        return None
+
     def set_node(self, index, node):
         if not isinstance(node, Node):
             print("given argument is not a Node!")

@@ -61,16 +61,16 @@ class TestBnB(unittest.TestCase):
         self.solution.value = self.solution.calculate_value()
         self.value = self.solution.value
 
-    def test_run(self):
-        bnb_algo = bnb.BranchNBound()
-        print("starting branchNbound with initial upper bound:" + str(self.value))
-        bnb_algo.initialize(self.instance, self.value)
-        upper_bound, routes, edges, times_branched = bnb_algo.run()
+    # def test_run(self):
+    #     bnb_algo = bnb.BranchNBound()
+    #     print("starting branchNbound with initial upper bound:" + str(self.value))
+    #     bnb_algo.initialize(self.instance, self.value)
+    #     upper_bound, routes, edges, times_branched = bnb_algo.run()
 
-        print("times branched: " + str(times_branched))
-        print("value: "+ str(upper_bound))
-        print("routes: "+ str(routes))
-        print("edges:"+ str(edges))
+    #     print("times branched: " + str(times_branched))
+    #     print("value: "+ str(upper_bound))
+    #     print("routes: "+ str(routes))
+    #     print("edges:"+ str(edges))
 
 
 class TestBnBPartialSolution1(unittest.TestCase):

@@ -5,12 +5,12 @@ DEPOT = 1
 
 class TabuSearch(object):
 
-    def __init__(self, instance):
+    def __init__(self, instance, iterations):
         self.tabu = []
-        self.instance = instance
-        self.current_best = copy.deepcopy(instance)  # copy do zrobienia
-        self.best_value
-        self.iterations
+        # self.instance = instance
+        # self.best_instance = copy.deepcopy(instance)  # copy do zrobienia
+        # self.best_value = self.best_instance.eval()
+        # self.iterations = iterations
 
     def run(self):
         while self.iterations > 0:
@@ -27,19 +27,30 @@ class TabuSearch(object):
             vehicle.route
             pass  # tak tak
 
-    def swap_2opt(self, route, i, k):
-        new_route = []
-        pass
+    def swap_2opt(self, route, i_id, k_id):
+        if i_id is DEPOT or k_id is DEPOT:
+            raise ValueError
 
-    def swap_intra(self, source_route, dest_route, node, position):
+        i = route.get_node_position(i_id)
+        k = route.get_node_position(k_id)
+        new_route = []
+        new_route.extend(route[0:i])
+        between = route[i:k+1]
+        between.reverse()
+        new_route.extend(between)
+        new_route.extend(route[k+1:])
+        print(new_route)
+        return new_route
+
+    def swap_intra(self, source_route, dest_route, node_id, position):
         pass
 
     def choose_edge(self):
         pass
 
     def eval(self):
-        check_feasibility()
-        calculate_value()
+        self.check_feasibility()
+        self.calculate_value()
 
     def check_feasibility(self):
         pass
