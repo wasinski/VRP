@@ -293,7 +293,7 @@ class TestBnBPartialSolution1(unittest.TestCase):
         bnbinstance.solve_leaf_second()
         self.assertEqual(bnbinstance.edges[True], [(1, 3), (2, 0)])
 
-        bnbinstance.distance_matrix = numpy.array([[float("inf"), 0, 3],
+        bnbinstance.distance_matrix = numpy.array([[float("inf"), 1, 3],
                                                   [1, float("inf"), float("inf")],
                                                   [2, 0, float("inf")]])
         bnbinstance.edges = {True: [], False: []}

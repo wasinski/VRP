@@ -139,17 +139,6 @@ class BranchNBound(object):
 
                 print(" was leaf - solved - pruned")
                 continue
-        # for i in range(len(self.partial_solutions)):
-        #     if solution.remove:
-        #         self.partial_solutions.remove(solution)
-        # how_many = 0
-        # for i, solution in enumerate(self.partial_solutions):
-        #     if solution.remove:
-        #         print("found one more!")
-        #         how_many += 1
-        # if how_many > 0:
-        #     print("how many: "+str(how_many))
-        #     raise AssertionError
 
     def is_more_promising(self, best, current):
         if current.lower_bound <= best.lower_bound:
@@ -260,18 +249,7 @@ class BnBPartialSolution(object):
         else:
             return False
 
-    # def solve_leaf_first(self):
-    #     matrix = self.distance_matrix
-
-    #     if 0 <= matrix[1, 1] < float("inf"):
-    #         if 0 <= matrix[2, 2] < float("inf"):
-    #             edge1 = (int(matrix[1, 0]), int(matrix[0, 1]))
-    #             edge2 = (int(matrix[2, 0]), int(matrix[0, 2]))
-    #             self.edges[True].extend([edge1, edge2])
-    #     else:
-    #         raise ValueError
-
-    def solve_leaf_first(self):  # new!
+    def solve_leaf_first(self):
         matrix = self.distance_matrix
 
         edge1 = (int(matrix[1, 0]), int(matrix[0, 1]))
@@ -285,18 +263,7 @@ class BnBPartialSolution(object):
             if edge2 not in self.edges[True]:
                 self.edges[True].append(edge2)
 
-    # def solve_leaf_second(self):
-    #     matrix = self.distance_matrix
-
-    #     if 0 <= matrix[1, 2] < float("inf"):
-    #         if 0 <= matrix[2, 1] < float("inf"):
-    #             edge1 = (int(matrix[1, 0]), int(matrix[0, 2]))
-    #             edge2 = (int(matrix[2, 0]), int(matrix[0, 1]))
-    #             self.edges[True].extend([edge1, edge2])
-    #     else:
-    #         raise ValueError
-
-    def solve_leaf_second(self):  #new!
+    def solve_leaf_second(self):
         matrix = self.distance_matrix
 
         edge1 = (int(matrix[1, 0]), int(matrix[0, 2]))

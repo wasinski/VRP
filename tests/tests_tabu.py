@@ -77,6 +77,10 @@ class TestTabuSpecific(unittest.TestCase):
         for node, id_ in zip(new_dest_route, ids):
             self.assertEqual(id_, node.id)
 
+        with self.assertRaises(ValueError):
+            new_dest_route = self.tabu_search.swap_intra(src_route, dest_route, 1)
+
+
 
 if __name__ == "__main__":
     unittest.main()
