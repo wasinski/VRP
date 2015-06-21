@@ -13,7 +13,8 @@ class TabuSearch(object):
 
     def run(self):
         while self.iterations > 0:
-            pass
+            self.optimize_intra()
+            self.optimize_internal()
             self.iterations -= 1
 
     def optimize_internal(self):
@@ -49,5 +50,17 @@ class TabuSearch(object):
         dest_route.insert_node(position, swap_node)
         return dest_route
 
-    def choose_edge(self):
-        pass
+    def choose_edge_internal(self, route):
+        longest = 0
+        edge = None
+        for i, node in enumerate(route):
+            try:
+                distance = self.instance.distance_between(node.id, route[i+1].id)
+            except IndexError:
+                break
+            if longest < distance:
+                longest = distance
+                edge = (node.id, route[i+1].id)
+        return edge
+
+

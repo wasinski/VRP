@@ -35,9 +35,9 @@ class TestTabuSpecific(unittest.TestCase):
 
     def setUp(self):
         raw_data = dm.Importer()
-        raw_data.import_data("./tests/cvrp2.test")
+        # raw_data.import_data("./tests/cvrp2.test")
         # raw_data.import_data("./tests/ulysses-n16-k3.vrp")
-        # raw_data.import_data("./tests/E-n23-k3.vrp")
+        raw_data.import_data("./tests/E-n23-k3.vrp")
         # raw_data.import_data("./tests/cvrp3.test")
         # raw_data.import_data("./tests/P-n19-k2.vrp")
         data = dm.DataMapper(raw_data)
@@ -98,6 +98,10 @@ class TestTabuSpecific(unittest.TestCase):
         self.assertEqual(self.tabu_search.instance.solution.fleet[0].route[0].id, self.tabu_search.best_instance.solution.fleet[0].route[0].id)
         self.tabu_search.instance.solution.fleet[0].route[0].id = 666
         self.assertNotEqual(self.tabu_search.instance.solution.fleet[0].route[0].id, self.tabu_search.best_instance.solution.fleet[0].route[0].id)
+
+    def test_choose_edge_internal(self):
+        print (self.tabu_search.choose_edge_internal(self.tabu_search.instance.solution.fleet[0].route))
+
 
 if __name__ == "__main__":
     unittest.main()
