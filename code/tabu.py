@@ -5,12 +5,11 @@ DEPOT = 1
 
 class TabuSearch(object):
 
-    def __init__(self, instance, iterations):
+    def __init__(self, solution, iterations):
         self.tabu = []
-        # self.instance = instance
-        # self.best_instance = copy.deepcopy(instance)  # copy do zrobienia
-        # self.best_value = self.best_instance.eval()
-        # self.iterations = iterations
+        self.instance = solution
+        self.best_instance = copy.deepcopy(self.instance)  # copy do zrobienia
+        self.iterations = iterations
 
     def run(self):
         while self.iterations > 0:
@@ -42,7 +41,6 @@ class TabuSearch(object):
         return new_route
 
     def swap_intra(self, source_route, dest_route, node_id, position=None):
-        print(dest_route)
         if position is None:
             position = len(dest_route) - 1
         if node_id is DEPOT:
@@ -53,17 +51,3 @@ class TabuSearch(object):
 
     def choose_edge(self):
         pass
-
-    def eval(self):
-        self.check_feasibility()
-        self.calculate_value()
-
-    def check_feasibility(self):
-        pass
-
-    def calculate_value(self):
-        pass
-
-
-class ParallelTS(object):
-    pass

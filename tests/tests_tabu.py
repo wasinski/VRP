@@ -23,9 +23,9 @@ class TestTabuGeneral(unittest.TestCase):
         self.solution = a.Solution(self.instance)
 
         greedy = gf.GreedyFirst(self.solution.solution)
-        greedy.run(sort=False)
-        self.solution.value = self.solution.calculate_value()
-        self.value = self.solution.value
+        greedy.run(sort=True)
+        self.solution.value = self.solution.eval()
+        self.tabu_search = tabu.TabuSearch(self.solution, 100)
 
     def test_(self):
         pass
@@ -34,7 +34,20 @@ class TestTabuGeneral(unittest.TestCase):
 class TestTabuSpecific(unittest.TestCase):
 
     def setUp(self):
-        self.tabu_search = tabu.TabuSearch(1, 100)
+        raw_data = dm.Importer()
+        raw_data.import_data("./tests/cvrp2.test")
+        # raw_data.import_data("./tests/ulysses-n16-k3.vrp")
+        # raw_data.import_data("./tests/E-n23-k3.vrp")
+        # raw_data.import_data("./tests/cvrp3.test")
+        # raw_data.import_data("./tests/P-n19-k2.vrp")
+        data = dm.DataMapper(raw_data)
+        self.instance = i.ProblemInstance(data)
+        self.solution = a.Solution(self.instance)
+
+        greedy = gf.GreedyFirst(self.solution.solution)
+        greedy.run(sort=True)
+        self.solution.value = self.solution.eval()
+        self.tabu_search = tabu.TabuSearch(self.solution, 100)
 
     def test_swap_2opt(self):
 
@@ -80,7 +93,11 @@ class TestTabuSpecific(unittest.TestCase):
         with self.assertRaises(ValueError):
             new_dest_route = self.tabu_search.swap_intra(src_route, dest_route, 1)
 
+    def test_deep_copy(self):
 
+        self.assertEqual(self.tabu_search.instance.solution.fleet[0].route[0].id, self.tabu_search.best_instance.solution.fleet[0].route[0].id)
+        self.tabu_search.instance.solution.fleet[0].route[0].id = 666
+        self.assertNotEqual(self.tabu_search.instance.solution.fleet[0].route[0].id, self.tabu_search.best_instance.solution.fleet[0].route[0].id)
 
 if __name__ == "__main__":
     unittest.main()

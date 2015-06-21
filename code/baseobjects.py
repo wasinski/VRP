@@ -104,9 +104,9 @@ class Network(object):
     def __getitem__(self, key):
         return self.network[key]
 
-    def __deepcopy__(self, memo):
-        network_copy = copy.deepcopy(self.network)
-        return Network(network_copy)
+    # def __deepcopy__(self, memo):
+    #     network_copy = copy.deepcopy(self.network)
+    #     return Network(network_copy)
 
     def set_network(self, my_network):
         self.network = my_network
@@ -174,8 +174,8 @@ class Route(object):
     def __len__(self):
         return len(self.route)
 
-    def __deepcopy__(self, memo):
-        return copy.deepcopy(self.route, memo={})
+    # def __deepcopy__(self, memo):
+    #     return copy.deepcopy(self.route, memo={})
 
     def __bool__(self):
         return bool(self.route)

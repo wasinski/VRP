@@ -224,7 +224,6 @@ class TestBnBPartialSolution1(unittest.TestCase):
         bnbinstance.edges = {True: [(6, 2), (3, 5), (5, 6), (4, 1), (2, 1), (1, 3), (1, 4)], False: []}
         bnbinstance.construct_routes()
         self.assertEqual(bnbinstance.routes, [[(1, 4), (4, 1)], [(1, 3), (3, 5), (5, 6), (6, 2), (2, 1)]])
-        print("this interests me")
         bnbinstance.edges = {True: [(21, 23), (18, 15), (23, 18), (5, 22), (12, 1), (1, 13), (1, 8), (14, 11), (10, 1), (11, 10), (1, 14), (19, 20), (20, 21), (6, 5), (9, 6), (2, 7), (16, 17), (15, 16), (13, 1), (4, 3), (3, 2), (17, 4), (7, 12), (22, 19), (8, 9)]}
         bnbinstance.construct_routes()
         self.assertEqual(bnbinstance.routes, [[(1, 8), (8, 9), (9, 6), (6, 5), (5, 22), (22, 19), (19, 20), (20, 21), (21, 23), (23, 18), (18, 15), (15, 16), (16, 17), (17, 4), (4, 3), (3, 2), (2, 7), (7, 12), (12, 1)], [(1, 13), (13, 1)], [(1, 14), (14, 11), (11, 10), (10, 1)]])

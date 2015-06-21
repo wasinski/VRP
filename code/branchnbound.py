@@ -42,14 +42,11 @@ class BranchNBound(object):
             print(str(promising_solution.distance_matrix))
             self.branch(promising_solution)
             self.prune()
-            # if self.times_branched == 100:
-            #     break
             print("-----------------------")
         return (self.upper_bound, self.current_best.routes, self.current_best.edges[True], self.times_branched)
 
     def branch(self, to_branch):
         best_edge = to_branch.select_edge()
-        print("selected edge: "+str(best_edge))
         if None in best_edge:
             return
         # left, with-branch
@@ -80,38 +77,23 @@ class BranchNBound(object):
 
             if solution.lower_bound >= self.upper_bound:
                 solution.remove = True
-                #self.partial_solutions.remove(solution)
-                print(" fattom - pruned, lower="+str(solution.lower_bound)+" upper="+str(self.upper_bound))
                 continue
 
             if solution.is_feasible is False:
                 solution.remove = True
-                #self.partial_solutions.remove(solution)
-                print(" won't be feasible - pruned")
                 continue
 
             if solution.leaf:
                 first_solution = BnBPartialSolution(solution)
                 second_solution = BnBPartialSolution(solution)
                 solution.remove = True
-                #self.partial_solutions.remove(solution)
-                print("leaf to solve:")
-                print(solution.distance_matrix)
-                print(solution.edges)
                 try:
                     first_solution.solve_leaf_first()
                     first_solution.construct_routes()
                     first_solution.set_is_feasible(final=True)
-                    # print("found feasible solution!")
-                    # print(first_solution.edges)
-                    # print("that gives a route:")
-                    # print(first_solution.routes)
-                    # print("and converted:")
-                    # print(first_solution.routes_edges_to_nodes())
+
                     if first_solution.is_feasible:
-                        # print("it is feasible!")
                         value = first_solution.calculate_value()
-                        # print("value: " + str(value))
                         if value < self.upper_bound:
                             self.upper_bound = value
                             self.current_best = first_solution
@@ -121,23 +103,15 @@ class BranchNBound(object):
                     second_solution.solve_leaf_second()
                     second_solution.construct_routes()
                     second_solution.set_is_feasible(final=True)
-                    # print("found feasible solution!")
-                    # print(second_solution.edges)
-                    # print("that gives a route:")
-                    # print(second_solution.routes)
-                    # print("and converted:")
-                    # print(second_solution.routes_edges_to_nodes())
+
                     if second_solution.is_feasible:
-                        # print("it is feasible!")
                         value = second_solution.calculate_value()
-                        # print("value: " + str(value))
                         if value < self.upper_bound:
                             self.upper_bound = value
                             self.current_best = second_solution
                 except ValueError:
                     pass
 
-                print(" was leaf - solved - pruned")
                 continue
 
     def is_more_promising(self, best, current):
@@ -327,9 +301,6 @@ class BnBPartialSolution(object):
             set_ = True
         self.distance_matrix = matrix
         return set_
-        # print("set infinity at: " + str(edge))
-        # print("matrix:")
-        # print(self.distance_matrix)
 
     def routes_edges_to_nodes(self):
         DEPOT = 1
@@ -375,10 +346,7 @@ class BnBPartialSolution(object):
             index = None
             end = route[-1][1]
             start = route[0][0]
-            # print("--------------")
-            # print("current route: ")
-            # print(route)
-            # print("start: "+str(start) + "  end: "+ str(end))
+
             for i, edge in enumerate(edges):
                 if edge[0] == end and end is not DEPOT:
                     found_match = True
@@ -391,14 +359,11 @@ class BnBPartialSolution(object):
 
             if found_match:
                 edge = edges.pop(index)
-                # print("found match on start " + str(on_start) + "  edge: " + str(edge))
                 if on_start:
                     route.insert(0, edge)
                 else:
                     route.append(edge)
             else:
-                # print("no match, appending:")
-                # print(route)
                 routes.append(route)
                 route = []
                 try:

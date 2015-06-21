@@ -1,3 +1,6 @@
+DEPOT = 1
+
+
 class Algorithm(object):
 
     def __init__(self, iterations, algo):
@@ -27,11 +30,19 @@ class Solution(object):
         self.feasible = False
         self.value = None
 
-    def evaluate(self):
-        pass
+    def eval(self):
+        if self.is_feasible():
+            self.feasible = True
+            return self.calculate_value()
+        else:
+            self.feasible = False
+            raise ValueError
 
     def is_feasible(self):
-        pass
+        for vehicle in self.solution.fleet:
+            if vehicle.route[0].id is not DEPOT or vehicle.route[-1].id is not DEPOT:
+                return False
+        return True
 
     def calculate_value(self):
         summary_distance = 0
