@@ -98,5 +98,17 @@ class TestSolution(unittest.TestCase):
 
         print ("vals:", TestSolution.value1, TestSolution.value2)
 
+    def test_route_val_with_n_without(self):
+        greedy = gf.GreedyFirst(self.solution.solution)
+        self.solution.solution = greedy.run(sort=True)
+        original_value1 = self.solution.value = self.solution.route_value(self.solution.solution.fleet[1])
+        original_value2 = self.solution.value = self.solution.route_value(self.solution.solution.fleet[2])
+        node_id = self.solution.solution.fleet[1].route[2].id
+
+        without_val = self.solution.route_value_without(self.solution.solution.fleet[1], node_id)
+        with_extra_val = self.solution.route_value_with_extra(self.solution.solution.fleet[2], node_id, 2)
+
+        self.assertTrue(original_value1 > without_val)
+        self.assertTrue(original_value2 < with_extra_val)
 if __name__ == "__main__":
     unittest.main()

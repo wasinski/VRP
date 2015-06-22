@@ -94,66 +94,41 @@ class TabuSearch(object):
         new_route.extend(route[k+1:])
         return new_route
 
-    def generate_best_possible_swap(self, node_id):
-        print("finding best neighbor for node:" + str(node_id))
-        closest = float("inf")
-        vehicle_id = None
-        neighbor_id = None
+    def generate_best_possible_swap(self):
         for vehicle in self.instance.solution.fleet:
-            for node in vehicle.route:
-                if vehicle.route.get_node_position(node_id) is not None:
-                    continue
-                if self.instance.solution.network.get_node(node_id).demand + vehicle.load <= vehicle.capacity:
-                    print("found fitting")
-                    distance = self.instance.distance_between(node.id, node_id)
-                    if distance < closest:
-                        print("found closer")
-                        closest = distance
-                        vehicle_id = vehicle.id
-                        neighbor_id = node.id
-        return (vehicle_id, neighbor_id)
+            edges = self.get_sorted_edges(vehicle)
+            longest_edge = list(edges.pop())
+            for node_id in longest_edge:
+                if node_id is DEPOT:
+                    longest_edge.remove(node_id)
+            if longest_edge:
+                for node_id in longest_edge:
+                    neighbours = self.best_neighbours(node_id)
 
-    def choose_node(self, wrong_nodes, longest=0, fromtabu=False):  # this is bad and wrong, and evil
-        longest = 0
-        edge = None
-        vehicle_id = None
-        for vehicle in self.instance.solution.fleet:
-            for i, node in enumerate(vehicle.route[0:-2]):
-                if node.id is DEPOT or vehicle.route[i+1].id is DEPOT \
-                or node.id in wrong_nodes or vehicle.route[i+1].id in wrong_nodes:
-                    continue
-                if not fromtabu:
-                    if node.id in self.tabu or vehicle.route[i+1].id in self.tabu:
-                        continue
-                elif fromtabu:
-                    if node.id not in self.tabu or vehicle.route[i+1].id not in self.tabu:
-                        continue
-                try:
-                    distance = self.instance.distance_between(node.id, vehicle.route[i+1].id)
-                except IndexError:
-                    break
-                if longest < distance:
-                    longest = distance
-                    edge = (node.id, vehicle.route[i+1].id)
-                    vehicle_id = vehicle.id
-        print(edge)
-        if edge is (DEPOT, DEPOT):
-            raise ValueError
-        if edge[1] is DEPOT:
-            return (vehicle_id, edge[0])
-        else:
-            return (vehicle_id, edge[1])
 
-    def choose_node_in_route(self, vehicle):
-        edges = [(1, 1)]
-        for i, node in enumerate(vehicle.route[1:]):
-            edge = (vehicle.route[i-1].id, node.id)
-            distance = self.instance.distance_between(edge[0], edge[1])
-            if distance > self.instance.distance_between(edges[-1][0], edges[-1][1]):
+    def assess_move(self, node_id, source_vehicle, dest_vehicle, position):
+        source_route_value = self.instance.route_value(source_vehicle)
+        dest_route_value = self.instance.route_value(dest_vehicle)
+
+    def best_neighbours(self, node_id):
+        neighbours = []
+        for pos, neighbour_dist in enumerate(self.instance.solution.distance_matrix[node_id-1]):
+            neighbours.append((pos+1, neighbour_dist))
+        neighbours = sorted(neighbours, reverse=True, key=lambda neighbour: neighbour[1])
+        neighbours.pop()
+        return neighbours
+
+    def get_sorted_edges(self, vehicle):
+        edges = []
+        for i, node in enumerate(vehicle.route):
+            try:
+                edge = (node.id, vehicle.route[i+1].id)
                 edges.append(edge)
-        edges.pop(0)
-        for edge in reversed(edges):
-            if edge[0] is not DEPOT and edge[1] is not DEPOT:
-                return edge
-        return None
+            except IndexError:
+                break
+        for node in vehicle.route:
+            print(node.id)
+        print (edges)
+        edges = sorted(edges, reverse=False, key=lambda edge: self.instance.distance_between(edge[0], edge[1]))
+        return edges
 

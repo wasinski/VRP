@@ -1,3 +1,4 @@
+import copy
 DEPOT = 1
 
 
@@ -60,6 +61,18 @@ class Solution(object):
                 break
             vehicle_distance += self.distance_between(source_id, destination_id)
         return vehicle_distance
+
+    def route_value_with_extra(self, vehicle, node_id, position):
+        temp_vehicle = copy.deepcopy(vehicle)
+        node = self.solution.network.get_node(node_id)
+        temp_vehicle.route.insert_node(position, node)
+        return self.route_value(temp_vehicle)
+
+    def route_value_without(self, vehicle, node_id):
+        temp_vehicle = copy.deepcopy(vehicle)
+        temp_vehicle.route.pop_node_id(node_id)
+        return self.route_value(temp_vehicle)
+
 
     def distance_between(self, source_id, destination_id):
         return self.solution.distance_matrix[source_id-1][destination_id-1]
