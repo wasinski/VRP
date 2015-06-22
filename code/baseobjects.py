@@ -1,7 +1,3 @@
-# TODO: deepcopy atributes need to be fixed, as in Network (that one works fine)
-import copy
-
-
 class Node(object):
 
     def __init__(self, my_id, my_node_coordinates, my_demand):
@@ -98,10 +94,6 @@ class Network(object):
     def __getitem__(self, key):
         return self.network[key]
 
-    # def __deepcopy__(self, memo):
-    #     network_copy = copy.deepcopy(self.network)
-    #     return Network(network_copy)
-
     def set_network(self, my_network):
         self.network = my_network
 
@@ -164,9 +156,6 @@ class Route(object):
 
     def __len__(self):
         return len(self.route)
-
-    # def __deepcopy__(self, memo):
-    #     return copy.deepcopy(self.route, memo={})
 
     def __bool__(self):
         return bool(self.route)
