@@ -15,70 +15,22 @@ class TabuSearch(object):
 
     def run(self):
         while self.iterations > 0:
-            self.instance.value = self.instance.eval()
-            if self.instance.value is None:
-                raise TypeError
-            instance_memo = copy.deepcopy(self.instance)
-            node_id = self.optimize_intra()
-            self.instance.value = self.instance.eval()
-            if self.instance.value is None:
-                raise TypeError
-            if self.instance.value == instance_memo.value:
-                print("ło kurwa wiedzialem")
-                raise Exception
-            if self.instance.value < instance_memo.value:
-                if node_id not in self.tabu:
-                    self.tabu.append(node_id)
-                if self.instance.value < self.best_instance.value:
-                    self.best_instance = copy.deepcopy(self.instance)
-                    print("found better!")
-            # aspiration criteria:
-            # else:
-            #     #self.instance = instance_memo
-            #     if node_id not in self.tabu:
-            #         self.tabu.append(node_id)
-            #     node_id = self.optimize_intra(fromtabu=True)
-            #     if self.instance.value < self.best_instance.value:
-            #         self.best_instance = copy.deepcopy(self.instance)
-            #         print("found better by aspiration!")
-            if len(self.tabu) > 8:
-                self.tabu.pop(0)
-            print("node ID")
-            print(node_id)
-            print (self.tabu)
+            swap = self.generate_best_possible_swap()
+            if swap is None:
+                print("No swaps found - ending iterations!")
+                break
+            node_id, source_vehicle, dest_vehicle, position = swap
+            self.perform_move(node_id, source_vehicle, dest_vehicle, position)
+            if self.instance.value < self.best_instance.value:
+                self.best_instance = copy.deepcopy(self.instance)
             self.iterations -= 1
 
-    def optimize(self):
-        pass
-
-    def optimize_intra(self, fromtabu=False):
-        node_id = None
-        wrong_nodes = []
-        while node_id is None:
-            source_vehicle_id, node_id = self.choose_node(wrong_nodes, fromtabu=fromtabu)
-            dest_vehicle_id, neighbor_id = self.generate_best_possible_swap(node_id)
-            if source_vehicle_id is None or node_id is None or dest_vehicle_id is None or neighbor_id is None:
-                print([source_vehicle_id, node_id, dest_vehicle_id, neighbor_id])
-                wrong_nodes.append(node_id)
-                node_id = None
-        source_vehicle = self.instance.solution.fleet.get_vehicle(source_vehicle_id)
-        dest_vehicle = self.instance.solution.fleet.get_vehicle(dest_vehicle_id)
-        neighbor_position = dest_vehicle.route.get_node_position(neighbor_id)
-
-        print(self.instance.solution.fleet.fleet)
-        self.swap_intra(self.instance.solution.fleet.get_vehicle(source_vehicle_id), self.instance.solution.fleet.get_vehicle(dest_vehicle_id), node_id, neighbor_position)
-        return node_id
-
-    def swap_intra(self, source_vehicle, dest_vehicle, node_id, position=None):
-        if position is None:
-            position = len(dest_vehicle.route) - 1
-        if node_id is DEPOT:
-            raise ValueError
-        print(source_vehicle, dest_vehicle)
-        print(source_vehicle.route.get_node_position(node_id), position)
-        swap_node = source_vehicle.route.pop_node_id(node_id)
-        dest_vehicle.route.insert_node(position, swap_node)
-        print(swap_node, source_vehicle, dest_vehicle)
+    def perform_move(self, node_id, source_vehicle, dest_vehicle, position):
+        self.instance.value
+        node = source_vehicle.route.pop_node_id(node_id)
+        dest_vehicle.route.insert_node(position, node)
+        self.instance.eval()
+        self.tabu.append(node_id)
 
     def swap_2opt(self, route, i_id, k_id):
         if i_id is DEPOT or k_id is DEPOT:
@@ -95,8 +47,13 @@ class TabuSearch(object):
         return new_route
 
     def generate_best_possible_swap(self):
+        edges = []
         for vehicle in self.instance.solution.fleet:
-            edges = self.get_sorted_edges(vehicle)
+            edges.extend(self.get_sorted_edges(vehicle))
+        edges = sorted(edges, reverse=False, key=lambda edge: self.instance.distance_between(edge[0], edge[1]))
+
+        chosen_swap = None
+        while(edges):
             longest_edge = list(edges.pop())
             for node_id in longest_edge:
                 if node_id is DEPOT:
@@ -104,11 +61,50 @@ class TabuSearch(object):
             if longest_edge:
                 for node_id in longest_edge:
                     neighbours = self.best_neighbours(node_id)
+                    neighbour_id = neighbours.pop()[0]
+                    source_vehicle = self.instance.solution.fleet.search_for_node(node_id)
+                    dest_vehicle = self.instance.solution.fleet.search_for_node(neighbour_id)
+                    position = dest_vehicle.route.get_node_position(neighbour_id)
+                    if self.assess_move(self, node_id, source_vehicle, dest_vehicle, position):
+                        if node_id in self.tabu:
+                            if self.check_aspiration_criteria(node_id, source_vehicle, dest_vehicle, position):
+                                chosen_swap = (node_id, source_vehicle, dest_vehicle, position)
+                                return chosen_swap
+                        else:
+                            chosen_swap = (node_id, source_vehicle, dest_vehicle, position)
+                            return chosen_swap
+                    elif self.assess_move(self, node_id, source_vehicle, dest_vehicle, position+1):
+                        if node_id in self.tabu:
+                            if self.check_aspiration_criteria(node_id, source_vehicle, dest_vehicle, position+1):
+                                chosen_swap = (node_id, source_vehicle, dest_vehicle, position+1)
+                                return chosen_swap
+                        else:
+                            chosen_swap = (node_id, source_vehicle, dest_vehicle, position+1)
+                            return chosen_swap
+        return chosen_swap
 
+    def check_aspiration_criteria(self, node_id, source_vehicle, dest_vehicle, position):
+        instance_value = self.instance.value
 
-    def assess_move(self, node_id, source_vehicle, dest_vehicle, position):
         source_route_value = self.instance.route_value(source_vehicle)
         dest_route_value = self.instance.route_value(dest_vehicle)
+        new_src_val = self.instance.route_value_without(source_vehicle, node_id)
+        new_dest_val = self.instance.route_value_with_extra(dest_vehicle, node_id, position)
+
+        diminished_value = instance_value - (source_route_value + dest_route_value)
+        new_instance_value = diminished_value + (new_src_val + new_dest_val)
+        return (new_instance_value < instance_value)
+
+    def assess_move(self, node_id, source_vehicle, dest_vehicle, position):
+        if not self.check_move_feasibility(dest_vehicle, node_id):
+            return False
+        if len(dest_vehicle.route.route) < position:
+            return False
+        source_route_value = self.instance.route_value(source_vehicle)
+        dest_route_value = self.instance.route_value(dest_vehicle)
+        new_src_val = self.instance.route_value_without(source_vehicle, node_id)
+        new_dest_val = self.instance.route_value_with_extra(dest_vehicle, node_id, position)
+        return (new_src_val + new_dest_val < source_route_value + dest_route_value)
 
     def best_neighbours(self, node_id):
         neighbours = []
@@ -132,3 +128,6 @@ class TabuSearch(object):
         edges = sorted(edges, reverse=False, key=lambda edge: self.instance.distance_between(edge[0], edge[1]))
         return edges
 
+    def check_move_feasibility(self, vehicle, node_id):
+        demand = self.instance.solution.network.get_node(node_id).demand
+        return (vehicle.capacity <= vehicle.load + demand)

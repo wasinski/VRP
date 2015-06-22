@@ -32,6 +32,8 @@ class Solution(object):
         self.value = None
 
     def eval(self):
+        for vehicle in self.solution.fleet:
+            vehicle.update_load()
         if self.is_feasible():
             self.feasible = True
             return self.calculate_value()
@@ -72,7 +74,6 @@ class Solution(object):
         temp_vehicle = copy.deepcopy(vehicle)
         temp_vehicle.route.pop_node_id(node_id)
         return self.route_value(temp_vehicle)
-
 
     def distance_between(self, source_id, destination_id):
         return self.solution.distance_matrix[source_id-1][destination_id-1]

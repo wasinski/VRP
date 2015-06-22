@@ -59,10 +59,10 @@ class TestTabuGeneral(unittest.TestCase):
         self.solution.value = self.solution.eval()
         self.tabu_search = tabu.TabuSearch(self.solution, 100)
 
-    # def test_general(self):
-    #     print("value before: " + str(self.tabu_search.best_instance.eval()))
-    #     self.tabu_search.run()
-    #     print("value after: " + str(self.tabu_search.best_instance.eval()))
+    def test_general(self):
+        print("value before: " + str(self.tabu_search.best_instance.eval()))
+        self.tabu_search.run()
+        print("value after: " + str(self.tabu_search.best_instance.eval()))
 
 
 if __name__ == "__main__":

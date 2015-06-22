@@ -110,5 +110,6 @@ class TestSolution(unittest.TestCase):
 
         self.assertTrue(original_value1 > without_val)
         self.assertTrue(original_value2 < with_extra_val)
+
 if __name__ == "__main__":
     unittest.main()

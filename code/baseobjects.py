@@ -78,6 +78,12 @@ class Vehicle(object):
     def get_route(self):
         return self.route
 
+    def update_load(self):
+        load = 0
+        for node in self.route:
+            load += node.demand
+        self.load = load
+
 
 class Network(object):
 
@@ -140,6 +146,22 @@ class Fleet(object):
                 return vehicle
         print("no match found for given id!")
         raise ValueError
+
+    def search_id_for_node(self, node_id):
+        for vehicle in self.fleet:
+            for node in vehicle.route:
+                if node.id == node_id:
+                    return vehicle.id
+        else:
+            return None
+
+    def search_for_node(self, node_id):
+        for vehicle in self.fleet:
+            for node in vehicle.route:
+                if node.id == node_id:
+                    return vehicle
+        else:
+            return None
 
 
 class Route(object):
