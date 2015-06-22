@@ -1,5 +1,6 @@
 import copy
 from code import baseobjects as bo
+from collections import deque
 
 DEPOT = 1
 
@@ -14,37 +15,44 @@ class TabuSearch(object):
 
     def run(self):
         while self.iterations > 0:
-            self.optimize_intra()
-            self.optimize_internal()
+            self.instance.value = self.instance.eval()
+            instance_memo = copy.deepcopy(self.instance)
+            node_id = self.optimize_intra()
+
+            self.instance.value = self.instance.eval()
+            if self.instance.value < self.best_instance.value:
+                self.best_instance = copy.deepcopy(self.instance)
+                print("found better!")
+                if node_id not in self.tabu:
+                    self.tabu.append(node_id)
+            else:
+                if node_id in self.tabu:
+                    print("caly czas tluklo")
+                    print(node_id)
+                    self.instance = instance_memo
+                    reasses = True
+                else:
+                    self.tabu.append(node_id)
+            if len(self.tabu) > 8:
+                self.tabu.pop(0)
             self.iterations -= 1
 
-    def optimize_internal(self):
-        for vehicle in self.instance.solution.fleet:
-            optimized = True
-            while optimized:
-                best_distance = self.instance.route_value(vehicle)
-                for node1 in vehicle.route[1:-2]:
-                    for node2 in vehicle.route[1:-2]:
-                        try:
-                            temp_route = self.swap_2opt(vehicle.route, node1.id, node2.id)
-                        except ValueError:
-                            continue
-                        new_vehicle = copy.deepcopy(vehicle)
-                        new_route = bo.Route()
-                        new_route.set_route(temp_route)
-                        new_vehicle.set_route(new_route)
-                        new_distance = self.instance.route_value(new_vehicle)
-                        if new_distance < best_distance:
-                            vehicle = new_vehicle
-                            optimized = True
-                            continue
-                        else:
-                            optimized = False
+    def optimize(self):
+        pass
 
-    def optimize_intra(self):
-        for vehicle in self.instance.fleet:
-            vehicle.route
-            pass  # tak tak
+    def optimize_intra(self, reasses=False):
+        source_vehicle_id, node_id = self.choose_node(tabu=reasses)
+        dest_vehicle_id, neighbor_id = self.generate_best_possible_swap(node_id)
+        if source_vehicle_id is None or node_id is None or dest_vehicle_id is None or neighbor_id is None:
+            return None
+        source_vehicle = self.instance.solution.fleet.get_vehicle(source_vehicle_id)
+        dest_vehicle = self.instance.solution.fleet.get_vehicle(dest_vehicle_id)
+        neighbor_position = dest_vehicle.route.get_node_position(neighbor_id)
+
+        self.swap_intra(source_vehicle.route, dest_vehicle.route, node_id, neighbor_position)
+
+        return node_id
+
 
     def swap_2opt(self, route, i_id, k_id):
         if i_id is DEPOT or k_id is DEPOT:
@@ -69,19 +77,53 @@ class TabuSearch(object):
         dest_route.insert_node(position, swap_node)
         return dest_route
 
-    def choose_edge(self, route):
-        pass
+    def generate_best_possible_swap(self, node_id):
+        closest = float("inf")
+        vehicle_id = None
+        neighbor_id = None
+        for vehicle in self.instance.solution.fleet:
+            for node in vehicle.route:
+                distance = self.instance.distance_between(node.id, node_id)
+                if distance < closest:
+                    if self.instance.solution.network.get_node(node_id).demand + vehicle.load <= vehicle.capacity:
+                        closest = distance
+                        vehicle_id = vehicle.id
+                        neighbor_id = node.id
+        return (vehicle_id, neighbor_id)
+
+    def choose_node(self, longest=0, tabu=False):  # this is bad and wrong, and evil
         longest = 0
         edge = None
-        second_edge = None
-        for i, node in enumerate(route):
-            try:
-                distance = self.instance.distance_between(node.id, route[i+1].id)
-            except IndexError:
-                break
-            if longest < distance:
-                longest = distance
-                edge = (node.id, route[i+1].id)
-                second_edge = edge
-        return (second_edge[1], edge[1])
+        vehicle_id = None
+        for vehicle in self.instance.solution.fleet:
+            for i, node in enumerate(vehicle.route):
+                if tabu:
+                    if node.id in self.tabu:
+                        continue
+                try:
+                    distance = self.instance.distance_between(node.id, vehicle.route[i+1].id)
+                except IndexError:
+                    break
+                if longest < distance:
+                    longest = distance
+                    edge = (node.id, vehicle.route[i+1].id)
+                    vehicle_id = vehicle.id
+
+        if edge[1] is DEPOT:
+            return (vehicle_id, edge[0])
+        else:
+            return (vehicle_id, edge[1])
+
+    def choose_node_in_route(self, vehicle):
+        edges = [(1, 1)]
+        for i, node in enumerate(vehicle.route[1:]):
+            edge = (vehicle.route[i-1].id, node.id)
+            distance = self.instance.distance_between(edge[0], edge[1])
+            if distance > self.instance.distance_between(edges[-1][0], edges[-1][1]):
+                edges.append(edge)
+        edges.pop(0)
+        for edge in reversed(edges):
+            if edge[0] is not DEPOT and edge[1] is not DEPOT:
+                return edge
+        return None
 

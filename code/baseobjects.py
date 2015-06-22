@@ -60,18 +60,12 @@ class Vehicle(object):
         if self.load + cargo <= self.capacity:
             self.load += cargo
         else:
-            print("couldnt add more cargo!")
-            print("vehicle id:" + str(self.id) + " load:" + str(self. load) +
-                  " cargo:" + str(cargo) + " capacity:" + str(self.capacity))
             raise ValueError
 
     def subtract_load(self, cargo):
         if self.load - cargo >= 0:
             self.load -= cargo
         else:
-            print("couldnt subtract cargo!")
-            print("vehicle id:" + str(self.id) + " load:" + str(self. load) +
-                  " cargo:" + str(cargo) + " capacity:" + str(self.capacity))
             raise ValueError
 
     def add_node(self, node):
@@ -142,9 +136,6 @@ class Fleet(object):
     def __len__(self):
         return len(self.fleet)
 
-    def __deepcopy__(self, memo):
-        return copy.deepcopy(self.fleet, memo={})
-
     def set_fleet(self, my_fleet):
         self.fleet = my_fleet
 
@@ -154,7 +145,7 @@ class Fleet(object):
     def get_vehicle(self, id_):
         for vehicle in self.fleet:
             if vehicle.id == id_:
-                return id_
+                return vehicle
         print("no match found for given id!")
         raise ValueError
 
@@ -187,7 +178,6 @@ class Route(object):
         if node not in self.route or node.id is 1:  # depot can be visited multiple time
             self.route.append(node)
         else:
-            print("node already in the route!")
             raise ValueError
 
     def pop_node_id(self, id_=None):
@@ -212,7 +202,6 @@ class Route(object):
         if node not in self.route:
             self.route[index] = node
         else:
-            print("node already in the route!")
             raise ValueError
 
     def insert_node(self, index, node):
@@ -222,7 +211,6 @@ class Route(object):
         if node not in self.route:
             self.route.insert(index, node)
         else:
-            print("node already in the route!")
             raise ValueError
 
     def switch_nodes_internaly(self, index1, index2):

@@ -36,7 +36,7 @@ class Solution(object):
             return self.calculate_value()
         else:
             self.feasible = False
-            raise ValueError
+            return None
 
     def is_feasible(self):
         for vehicle in self.solution.fleet:
