@@ -1,4 +1,5 @@
 import copy
+from code import baseobjects as bo
 
 DEPOT = 1
 
@@ -18,9 +19,27 @@ class TabuSearch(object):
             self.iterations -= 1
 
     def optimize_internal(self):
-        for vehicle in self.instance.fleet:
-            vehicle.route
-            pass  # tak tak...
+        for vehicle in self.instance.solution.fleet:
+            optimized = True
+            while optimized:
+                best_distance = self.instance.route_value(vehicle)
+                for node1 in vehicle.route[1:-2]:
+                    for node2 in vehicle.route[1:-2]:
+                        try:
+                            temp_route = self.swap_2opt(vehicle.route, node1.id, node2.id)
+                        except ValueError:
+                            continue
+                        new_vehicle = copy.deepcopy(vehicle)
+                        new_route = bo.Route()
+                        new_route.set_route(temp_route)
+                        new_vehicle.set_route(new_route)
+                        new_distance = self.instance.route_value(new_vehicle)
+                        if new_distance < best_distance:
+                            vehicle = new_vehicle
+                            optimized = True
+                            continue
+                        else:
+                            optimized = False
 
     def optimize_intra(self):
         for vehicle in self.instance.fleet:
@@ -50,9 +69,11 @@ class TabuSearch(object):
         dest_route.insert_node(position, swap_node)
         return dest_route
 
-    def choose_edge_internal(self, route):
+    def choose_edge(self, route):
+        pass
         longest = 0
         edge = None
+        second_edge = None
         for i, node in enumerate(route):
             try:
                 distance = self.instance.distance_between(node.id, route[i+1].id)
@@ -61,6 +82,6 @@ class TabuSearch(object):
             if longest < distance:
                 longest = distance
                 edge = (node.id, route[i+1].id)
-        return edge
-
+                second_edge = edge
+        return (second_edge[1], edge[1])
 

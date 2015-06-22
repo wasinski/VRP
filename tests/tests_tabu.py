@@ -23,7 +23,7 @@ class TestTabuGeneral(unittest.TestCase):
         self.solution = a.Solution(self.instance)
 
         greedy = gf.GreedyFirst(self.solution.solution)
-        greedy.run(sort=True)
+        greedy.run(sort=False)
         self.solution.value = self.solution.eval()
         self.tabu_search = tabu.TabuSearch(self.solution, 100)
 
@@ -101,6 +101,9 @@ class TestTabuSpecific(unittest.TestCase):
 
     def test_choose_edge_internal(self):
         print (self.tabu_search.choose_edge_internal(self.tabu_search.instance.solution.fleet[0].route))
+
+    def test_optimize_internal(self):
+        self.tabu_search.optimize_internal()
 
 
 if __name__ == "__main__":
