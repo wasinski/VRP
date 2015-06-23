@@ -33,16 +33,9 @@ class BranchNBound(object):
         while self.partial_solutions:
             promising_solution = self.pop_most_promising_solution()
             if promising_solution.remove:
-                print("removing!")
                 continue
-            print("pp, lowerb: "+ str(promising_solution.lower_bound))
-            print("pp, edges: ")
-            print(str(promising_solution.edges))
-            print("pp, matrix: ")
-            print(str(promising_solution.distance_matrix))
             self.branch(promising_solution)
             self.prune()
-            print("-----------------------")
         return (self.upper_bound, self.current_best.routes, self.current_best.edges[True], self.times_branched)
 
     def branch(self, to_branch):

@@ -15,10 +15,9 @@ class TabuSearch(object):
 
     def run(self):
         while self.iterations > 0:
-            print(self.tabu)
             swap = self.generate_best_possible_swap()
             if swap is None:
-                print("No swaps found - ending iterations!")
+                print("No more swaps found - ending iterations!")
                 break
             node_id, source_vehicle, dest_vehicle, position = swap
             self.perform_move(node_id, source_vehicle, dest_vehicle, position)
@@ -27,23 +26,15 @@ class TabuSearch(object):
             if len(self.tabu) > 8:
                 self.tabu.pop(0)
             self.iterations -= 1
+        if self.iterations is 0:
+            print ("Maximal number of iterations reached!")
 
     def perform_move(self, node_id, source_vehicle, dest_vehicle, position):
         self.instance.value
-        print("before:")
-        for vehicle in self.instance.solution.fleet:
-            for node in vehicle.route:
-                print(node.id, end=", ")
-            print("\n")
         node = source_vehicle.route.pop_node_id(node_id)
         dest_vehicle.route.insert_node(position, node)
         self.instance.value = self.instance.eval()
         self.tabu.append(node_id)
-        print("\nafter:")
-        for vehicle in self.instance.solution.fleet:
-            for node in vehicle.route:
-                print(node.id, end=", ")
-            print("\n")
 
     def swap_2opt(self, route, i_id, k_id):
         if i_id is DEPOT or k_id is DEPOT:
