@@ -11,7 +11,7 @@ class Algorithm(object):
     def initialize(self):
         pass
 
-    def iterate(self):
+    def run(self):
         pass
 
 

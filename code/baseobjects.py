@@ -82,6 +82,8 @@ class Vehicle(object):
         load = 0
         for node in self.route:
             load += node.demand
+        if load > self.capacity:
+            raise ValueError
         self.load = load
 
 
@@ -222,6 +224,7 @@ class Route(object):
         if node not in self.route:
             self.route.insert(index, node)
         else:
+            print("node.id: " + str(node.id) + " already in the route!")
             raise ValueError
 
     def switch_nodes_internaly(self, index1, index2):
