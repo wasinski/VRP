@@ -15,7 +15,7 @@ class TabuSearch(object):
 
     def run(self):
         while self.iterations > 0:
-            swap = self.generate_best_possible_swap()
+            swap = self.generate_first_better_swap()
             if swap is None:
                 print("No more swaps found - ending iterations!")
                 break
@@ -50,7 +50,7 @@ class TabuSearch(object):
         new_route.extend(route[k+1:])
         return new_route
 
-    def generate_best_possible_swap(self):
+    def generate_first_better_swap(self):
         edges = []
         for vehicle in self.instance.solution.fleet:
             edges.extend(self.get_sorted_edges(vehicle))

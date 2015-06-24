@@ -15,10 +15,10 @@ class TestTabuSpecific(unittest.TestCase):
         raw_data = dm.Importer()
         # raw_data.import_data("./tests/cvrp2.test")
         # raw_data.import_data("./tests/ulysses-n16-k3.vrp")
-        # raw_data.import_data("./tests/E-n23-k3.vrp")
+        raw_data.import_data("./tests/E-n23-k3.vrp")
         # raw_data.import_data("./tests/cvrp3.test")
         # raw_data.import_data("./tests/P-n19-k2.vrp")
-        raw_data.import_data("./tests/E-n101-k14.vrp")
+        #raw_data.import_data("./tests/E-n101-k14.vrp")
         data = dm.DataMapper(raw_data)
         self.instance = i.ProblemInstance(data)
         self.solution = a.Solution(self.instance)
@@ -63,10 +63,10 @@ class TestTabuGeneral(unittest.TestCase):
         self.solution.value = self.solution.eval()
         self.tabu_search = tabu.TabuSearch(self.solution, 100)
 
-    def test_general(self):
-        print("value before: " + str(self.tabu_search.best_instance.eval()))
-        self.tabu_search.run()
-        print("value after: " + str(self.tabu_search.best_instance.eval()))
+    # def test_general(self):
+    #     print("value before: " + str(self.tabu_search.best_instance.eval()))
+    #     self.tabu_search.run()
+    #     print("value after: " + str(self.tabu_search.best_instance.eval()))
 
 
 if __name__ == "__main__":
