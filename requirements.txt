@@ -1,0 +1,9 @@
+numpy
+attrs
+
+mypy
+pylint
+pytest
+invoke
+flake8
+black
