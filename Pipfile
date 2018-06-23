@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+attrs = "*"
+click = "*"
+
+[dev-packages]
+coverage = "*"
+mypy = "*"
+pylint = "*"
+flake8 = "*"
+flake8-mypy = "*"
+recommonmark = "*"
+Sphinx = "*"
+isort = "*"
+invoke = "*"
+black = "*"
+pre-commit = "*"

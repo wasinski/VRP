@@ -1,0 +1,8 @@
+- repo: local
+  hooks:
+  - id: precommit
+    name: "Pre-commit: sort imports, format code, check types, lint"
+    language: system
+    entry: invoke precommit
+    types: [python]
+    pass_filenames: false
