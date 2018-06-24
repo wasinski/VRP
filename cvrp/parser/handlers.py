@@ -1,11 +1,13 @@
 from abc import ABC, abstractclassmethod
 from collections import defaultdict
-from typing import Dict
+from typing import Dict, Iterable, KeysView, Tuple
+
+from cvrp.aliases import SectionName
 
 
 class SectionHandlerRegister:
     __instance = None
-    _register: Dict[str, "ASectionHandler"]
+    _register: Dict[SectionName, "ASectionHandler"]
 
     def __new__(cls, *args, **kwargs):
         if not isinstance(cls.__instance, cls):
@@ -13,20 +15,21 @@ class SectionHandlerRegister:
             cls._register = {}
         return cls.__instance
 
-    def dispatch(self, section) -> "ASectionHandler":
+    def dispatch(self, section: SectionName) -> "ASectionHandler":
         return self._register[section]
 
-    def register(self, handler):
-        assert issubclass(handler, ASectionHandler), "Not a SectionHandler"
+    def register(self, handler: "ASectionHandler") -> None:
         self._register[handler.section] = handler
 
     @property
-    def section_names(self):
+    def section_names(self) -> KeysView[SectionName]:
         return self._register.keys()
 
 
 class ASectionHandler(ABC):
     """Abstract SectionHandler - TemplateMethod pattern"""
+
+    section: SectionName
 
     @classmethod
     def handle(cls, f):
@@ -39,7 +42,7 @@ class ASectionHandler(ABC):
         raise NotImplementedError
 
     @classmethod
-    def __read_section(cls, f):
+    def __read_section(cls, f) -> Tuple[Iterable[str], SectionName]:
         lines = []
         line = f.readline().strip()
         while not cls.__has_section_changed(line):
@@ -50,7 +53,7 @@ class ASectionHandler(ABC):
         return lines, next_section
 
     @staticmethod
-    def __has_section_changed(line):
+    def __has_section_changed(line: str) -> bool:
         return line.lower() in SectionHandlerRegister().section_names
 
 
@@ -62,7 +65,7 @@ def section_handler(cls):
 
 @section_handler
 class InitialSectionHandler(ASectionHandler):
-    section = "initial_section"
+    section = SectionName("initial_section")
 
     @classmethod
     def process_section(cls, lines):
@@ -83,7 +86,7 @@ class InitialSectionHandler(ASectionHandler):
 
 @section_handler
 class NodeCoordSectionHandler(ASectionHandler):
-    section = "node_coord_section"
+    section = SectionName("node_coord_section")
 
     @classmethod
     def process_section(cls, lines):
@@ -96,7 +99,7 @@ class NodeCoordSectionHandler(ASectionHandler):
 
 @section_handler
 class DemandSectionHandler(ASectionHandler):
-    section = "demand_section"
+    section = SectionName("demand_section")
 
     @classmethod
     def process_section(cls, lines):
@@ -109,20 +112,23 @@ class DemandSectionHandler(ASectionHandler):
 
 @section_handler
 class DepotSectionHandler(ASectionHandler):
-    section = "depot_section"
+    section = SectionName("depot_section")
+    terminator = -1
 
     @classmethod
     def process_section(cls, lines):
         data = defaultdict(list)
         for line in lines:
-            nr = line.strip()
-            data[cls.section].append(int(nr))
+            nr = int(line.strip())
+            if nr == cls.terminator:
+                break
+            data[cls.section].append(nr - 1)
         return data
 
 
 @section_handler
 class EOFSectionHandler(ASectionHandler):
-    section = "eof"
+    section = SectionName("eof")
 
     @classmethod
     def process_section(cls, lines):
