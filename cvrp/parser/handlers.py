@@ -1,6 +1,6 @@
 from abc import ABC, abstractclassmethod
 from collections import defaultdict
-from typing import Dict, Iterable, KeysView, Tuple
+from typing import Dict, Iterable, KeysView, Tuple, overload
 
 from cvrp.aliases import SectionName
 
@@ -15,7 +15,16 @@ class SectionHandlerRegister:
             cls._register = {}
         return cls.__instance
 
+    @overload
     def dispatch(self, section: SectionName) -> "ASectionHandler":
+        ...
+
+    @overload
+    def dispatch(self, section: None) -> "ASectionHandler":
+        ...
+
+    def dispatch(self, section):
+        section = section or SectionName("initial_section")
         return self._register[section]
 
     def register(self, handler: "ASectionHandler") -> None:
@@ -32,8 +41,8 @@ class ASectionHandler(ABC):
     section: SectionName
 
     @classmethod
-    def handle(cls, f):
-        lines, next_section = cls.__read_section(f)
+    def handle(cls, input_data):
+        lines, next_section = cls.__read_section(input_data)
         section_data = cls.process_section(lines)
         return section_data, next_section
 
@@ -42,12 +51,12 @@ class ASectionHandler(ABC):
         raise NotImplementedError
 
     @classmethod
-    def __read_section(cls, f) -> Tuple[Iterable[str], SectionName]:
+    def __read_section(cls, input_data) -> Tuple[Iterable[str], SectionName]:
         lines = []
-        line = f.readline().strip()
+        line = input_data.pop(0).strip()
         while not cls.__has_section_changed(line):
             lines.append(line)
-            line = f.readline().strip()
+            line = input_data.pop(0).strip()
 
         next_section = line.lower()
         return lines, next_section

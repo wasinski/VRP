@@ -2,7 +2,6 @@ from typing import Any, Dict, TextIO
 
 import attr
 
-from cvrp.aliases import SectionName
 from cvrp.parser.handlers import SectionHandlerRegister
 
 
@@ -15,10 +14,11 @@ class Reader:
         return self._data
 
     def read(self, f: TextIO) -> None:
-        section = SectionName("initial_section")
-        while section != "eof":
+        section = None
+        input_data = f.readlines()
+        while input_data:
             section_data, section = (
-                SectionHandlerRegister().dispatch(section).handle(f)
+                SectionHandlerRegister().dispatch(section).handle(input_data)
             )
             self._data.update(section_data)
 

@@ -49,9 +49,7 @@ def check_types(c):
 def lint(c):
     """Lint code"""
     PYLINT_CMD = "pylint cvrp tests tasks.py"
-    result = c.run(PYLINT_CMD)
-    if result.return_code != 0:
-        exit(1)
+    c.run(PYLINT_CMD, warn=True)
 
 
 @task
